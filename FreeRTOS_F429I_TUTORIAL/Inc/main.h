@@ -182,6 +182,10 @@
 #define I2C3_SDA_GPIO_Port GPIOC
 #define I2C3_SCL_Pin GPIO_PIN_8
 #define I2C3_SCL_GPIO_Port GPIOA
+#define BT_TX_Pin GPIO_PIN_9
+#define BT_TX_GPIO_Port GPIOA
+#define BT_RX_Pin GPIO_PIN_10
+#define BT_RX_GPIO_Port GPIOA
 #define R4_Pin GPIO_PIN_11
 #define R4_GPIO_Port GPIOA
 #define R5_Pin GPIO_PIN_12
