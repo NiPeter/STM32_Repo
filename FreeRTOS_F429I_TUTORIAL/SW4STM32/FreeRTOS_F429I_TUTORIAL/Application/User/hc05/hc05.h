@@ -23,11 +23,6 @@ typedef enum
   BT_TIMEOUT  		= 0x03U,
 } BT_StatusTypeDef;
 
-
-
-char data[30];
-
-void BT_AT(void);
 void BT_Init(UART_HandleTypeDef* huart,GPIO_TypeDef* key_port,uint16_t key_pin);
 
 void BT_ATmode(ATmode mode);
@@ -37,12 +32,17 @@ BT_StatusTypeDef BT_SendChar(const char* data);
 BT_StatusTypeDef BT_ReceiveChar(char* data);
 
 BT_StatusTypeDef BT_SendMsg(const char* msg);
-BT_StatusTypeDef BT_ReceiveMsg(char* msg);
+BT_StatusTypeDef BT_SendMsg_IT( const char* msg );
 
-
-BT_StatusTypeDef BT_SendMsg_IT(char* msg, uint8_t len);
-BT_StatusTypeDef BT_ReceiveChar_IT(char* data);
+BT_StatusTypeDef BT_ReceiveChar_IT( void );
 
 BT_StatusTypeDef BT_ReceiveAT(char* msg);
+
+BT_StatusTypeDef BT_StartReceive( void );
+
+char BT_GetRxChar( void );
+
+USART_TypeDef* BT_GetInstance( void );
+
 
 #endif /* APPLICATION_USER_HC05_HC05_H_ */

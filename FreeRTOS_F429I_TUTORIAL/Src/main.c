@@ -106,6 +106,8 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
+  BT_Init(&huart1,NULL,0);
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

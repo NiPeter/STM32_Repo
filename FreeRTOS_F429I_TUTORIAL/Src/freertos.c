@@ -53,22 +53,34 @@
 
 /* USER CODE BEGIN Includes */     
 
+/***	STM INCLUDES	***/
+#include "main.h"
+#include "stm32f4xx_hal.h"
+
+/***	COMMUNICATION INCLUDES	***/
+#include "hc05.h"
+#include "cmd_protocol.h"
+
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osThreadId communicationTaskHandle;
+osMessageQId commQueueHandle;
+osMessageQId cmdQueueHandle;
 
 /* USER CODE BEGIN Variables */
-
+char bt_rx_byte;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
+void startCommunicationTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
-
+void ErrorBlink(void);
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
@@ -97,9 +109,22 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of communicationTask */
+  osThreadDef(communicationTask, startCommunicationTask, osPriorityAboveNormal, 0, 128);
+  communicationTaskHandle = osThreadCreate(osThread(communicationTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the queue(s) */
+  /* definition and creation of commQueue */
+  osMessageQDef(commQueue, 2, char*);
+  commQueueHandle = osMessageCreate(osMessageQ(commQueue), NULL);
+
+  /* definition and creation of cmdQueue */
+  osMessageQDef(cmdQueue, 1, CommandList_TypeDef*);
+  cmdQueueHandle = osMessageCreate(osMessageQ(cmdQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -111,16 +136,83 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
+	osEvent event;
+	CommandList_TypeDef* pCmdList;
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    event = osMessageGet(cmdQueueHandle,osWaitForever);
+    if(event.status != osEventMessage) ErrorBlink();
+
+    pCmdList = (CommandList_TypeDef*) event.value.p;
+    char msg[30];
+    itoa(pCmdList->Cnt,msg,10);
+    strcat(msg," to liczba odebranych\r\n");
+    BT_SendMsg_IT(msg);
+
   }
   /* USER CODE END StartDefaultTask */
 }
 
+/* startCommunicationTask function */
+void startCommunicationTask(void const * argument)
+{
+  /* USER CODE BEGIN startCommunicationTask */
+	osEvent event;
+	char* msg;
+	CommandList_TypeDef cmdList;
+
+	BT_ReceiveChar_IT();
+
+  /* Infinite loop */
+  for(;;)
+  {
+
+    event = osMessageGet(commQueueHandle,osWaitForever);
+    if(event.status != osEventMessage) ErrorBlink();
+
+    msg = (char*)event.value.p;
+	CP_UnpackMsg(msg,&cmdList);
+
+	osMessagePut(cmdQueueHandle,(uint32_t)&cmdList,0);
+
+	HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
+
+  }
+  /* USER CODE END startCommunicationTask */
+}
+
 /* USER CODE BEGIN Application */
      
+void ErrorBlink( void ){
+	while(1){
+		HAL_GPIO_TogglePin(LD4_GPIO_Port,LD4_Pin);
+		HAL_Delay(300);
+	}
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+	static char msg_buff[CP_MSG_SIZE];
+
+	if(huart->Instance == BT_GetInstance()){
+
+		osStatus queueStatus;
+
+		CP_StatusTypeDef msgStatus = CP_ComposeMsg(BT_GetRxChar(),msg_buff);
+
+		if(msgStatus == CP_MSG_READY) {
+			queueStatus = osMessagePut(commQueueHandle,(uint32_t)&msg_buff,0);
+			if(queueStatus != osOK) ErrorBlink(); // TODO Add some response to full queue problem
+		}
+
+		BT_ReceiveChar_IT();
+
+	}
+
+}
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

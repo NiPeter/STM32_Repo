@@ -1,7 +1,9 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,FootprintOK
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL
+FREERTOS.IPParameters=Tasks01,FootprintOK,configMAX_TASK_NAME_LEN,Queues01
+FREERTOS.Queues01=commQueue,2,char*,NULL,Dynamic,NULL,NULL;cmdQueue,1,CommandList_TypeDef*,NULL,Dynamic,NULL,NULL
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;communicationTask,1,128,startCommunicationTask,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.configMAX_TASK_NAME_LEN=32
 File.Version=6
 KeepUserPlacement=true
 Mcu.Family=STM32F4
