@@ -159,12 +159,18 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
+	size_t i;
 	/* Infinite loop */
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
 
-		osDelay(100);
+		char *msg_ptr = pvPortMalloc(20);
+		i = xPortGetFreeHeapSize();
+		sprintf(msg_ptr,"Default Task: %i\r\n",i);
+		osMessagePut(commTxQueueHandle,(uint32_t)msg_ptr,0);
+
+		osDelay(1000);
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -183,9 +189,8 @@ void StartCommandExecuterTask(void const * argument)
 
 	char *msg_ptr = pvPortMalloc(30);
 	if(msg_ptr == NULL ) ErrorBlink();
-    unsigned int iParam1 = (unsigned int)cmd.Param;
-    unsigned int iParam2 = (unsigned int)((cmd.Param - iParam1)*1000.0);
-    sprintf(msg_ptr,"%i=%i.%i;\r\n",(unsigned int)cmd.Command,iParam1,iParam2);
+
+	CP_PackMsg(cmd,msg_ptr);
 
     osMessagePut(commTxQueueHandle,(uint32_t)msg_ptr,0);
 

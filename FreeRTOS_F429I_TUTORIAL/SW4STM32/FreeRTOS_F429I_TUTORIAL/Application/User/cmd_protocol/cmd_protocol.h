@@ -37,6 +37,8 @@ typedef struct{
 
 CP_StatusTypeDef CP_UnpackMsg(const char* msg,CommandList_TypeDef * cmdL);
 
+CP_StatusTypeDef CP_PackMsg(Command_TypeDef cmd, char* msg);
+
 CP_StatusTypeDef CP_ComposeMsg(char byte, char result[] );
 
 void CP_ExecuteCommands(CommandList_TypeDef * cmdL);

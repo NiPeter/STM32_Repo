@@ -64,6 +64,15 @@ CP_StatusTypeDef CP_UnpackMsg(const char* msg,CommandList_TypeDef * cmdL){
 	return CP_OK;
 }
 
+CP_StatusTypeDef CP_PackMsg(Command_TypeDef cmd, char* msg){
+
+	uint16_t iParam1 = (uint16_t)cmd.Param;
+    uint16_t iParam2 = (uint16_t)((cmd.Param - iParam1)*1000.0);
+
+    sprintf(msg,"%i=%i.%i;\r\n",(uint16_t)cmd.Command, iParam1, iParam2);
+
+	return CP_OK;
+}
 
 CP_StatusTypeDef CP_ComposeMsg(char byte, char result[] ){
 
