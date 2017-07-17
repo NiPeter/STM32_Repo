@@ -146,7 +146,7 @@ void MX_FREERTOS_Init(void) {
   commRxQueueHandle = osMessageCreate(osMessageQ(commRxQueue), NULL);
 
   /* definition and creation of commTxQueue */
-  osMessageQDef(commTxQueue, 10, char*);
+  osMessageQDef(commTxQueue, 20, Command_TypeDef);
   commTxQueueHandle = osMessageCreate(osMessageQ(commTxQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -159,16 +159,11 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-	size_t i;
+
 	/* Infinite loop */
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
-
-		char *msg_ptr = pvPortMalloc(20);
-		i = xPortGetFreeHeapSize();
-		sprintf(msg_ptr,"Default Task: %i\r\n",i);
-		osMessagePut(commTxQueueHandle,(uint32_t)msg_ptr,0);
 
 		osDelay(1000);
 	}
@@ -187,12 +182,7 @@ void StartCommandExecuterTask(void const * argument)
 
 	xQueueReceive(cmdQueueHandle,&cmd,portMAX_DELAY);
 
-	char *msg_ptr = pvPortMalloc(30);
-	if(msg_ptr == NULL ) ErrorBlink();
-
-	CP_PackMsg(cmd,msg_ptr);
-
-    osMessagePut(commTxQueueHandle,(uint32_t)msg_ptr,0);
+	xQueueSendToBack(commTxQueueHandle,&cmd,0);
 
   }
   /* USER CODE END StartCommandExecuterTask */
@@ -233,19 +223,19 @@ void StartCommRxTask(void const * argument)
 void StartCommTxTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommTxTask */
-	osEvent event;
-	char *msg_ptr = NULL;
+
+	Command_TypeDef cmd;
+	char *msg_ptr = pvPortMalloc(15);
 
   /* Infinite loop */
   for(;;)
   {
 	osSemaphoreWait(commTxSemaphoreHandle,osWaitForever);
-	vPortFree(msg_ptr);
 
-	event = osMessageGet(commTxQueueHandle,osWaitForever);
-    if(event.status != osEventMessage) ErrorBlink();
+	xQueueReceive(commTxQueueHandle,&cmd,portMAX_DELAY);
 
-    msg_ptr = event.value.p;
+    CP_PackMsg(cmd,msg_ptr);
+
     BT_SendMsg_IT(msg_ptr);
   }
   /* USER CODE END StartCommTxTask */
