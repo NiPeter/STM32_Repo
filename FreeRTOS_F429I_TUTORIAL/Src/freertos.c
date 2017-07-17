@@ -66,6 +66,7 @@
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId communicationTaskHandle;
+osThreadId commandExecuterTaskHandle;
 osMessageQId commQueueHandle;
 osMessageQId cmdQueueHandle;
 
@@ -76,6 +77,7 @@ char bt_rx_byte;
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
 void startCommunicationTask(void const * argument);
+void StartCommandExecuterTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -113,6 +115,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(communicationTask, startCommunicationTask, osPriorityAboveNormal, 0, 128);
   communicationTaskHandle = osThreadCreate(osThread(communicationTask), NULL);
 
+  /* definition and creation of commandExecuterTask */
+  osThreadDef(commandExecuterTask, StartCommandExecuterTask, osPriorityAboveNormal, 0, 128);
+  commandExecuterTaskHandle = osThreadCreate(osThread(commandExecuterTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -123,7 +129,7 @@ void MX_FREERTOS_Init(void) {
   commQueueHandle = osMessageCreate(osMessageQ(commQueue), NULL);
 
   /* definition and creation of cmdQueue */
-  osMessageQDef(cmdQueue, 1, CommandList_TypeDef*);
+  osMessageQDef(cmdQueue, 20, Command_TypeDef*);
   cmdQueueHandle = osMessageCreate(osMessageQ(cmdQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -137,7 +143,7 @@ void StartDefaultTask(void const * argument)
 
   /* USER CODE BEGIN StartDefaultTask */
 	osEvent event;
-	CommandList_TypeDef* pCmdList;
+	Command_TypeDef cmd;
 
   /* Infinite loop */
   for(;;)
@@ -145,10 +151,10 @@ void StartDefaultTask(void const * argument)
     event = osMessageGet(cmdQueueHandle,osWaitForever);
     if(event.status != osEventMessage) ErrorBlink();
 
-    pCmdList = (CommandList_TypeDef*) event.value.p;
+    cmd = *(Command_TypeDef*) event.value.p;
     char msg[30];
-    itoa(pCmdList->Cnt,msg,10);
-    strcat(msg," to liczba odebranych\r\n");
+    itoa(cmd.Command,msg,10);
+    strcat(msg," to odebrana komenda\r\n");
     BT_SendMsg_IT(msg);
 
   }
@@ -175,12 +181,26 @@ void startCommunicationTask(void const * argument)
     msg = (char*)event.value.p;
 	CP_UnpackMsg(msg,&cmdList);
 
-	osMessagePut(cmdQueueHandle,(uint32_t)&cmdList,0);
+	while(cmdList.Cnt--){
+		osMessagePut(cmdQueueHandle,(uint32_t)&cmdList.CmdBuff[cmdList.Cnt],0);
+	}
 
 	HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
 
   }
   /* USER CODE END startCommunicationTask */
+}
+
+/* StartCommandExecuterTask function */
+void StartCommandExecuterTask(void const * argument)
+{
+  /* USER CODE BEGIN StartCommandExecuterTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartCommandExecuterTask */
 }
 
 /* USER CODE BEGIN Application */
