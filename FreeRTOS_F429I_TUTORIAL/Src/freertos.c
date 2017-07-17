@@ -65,19 +65,23 @@
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
-osThreadId communicationTaskHandle;
 osThreadId commandExecuterTaskHandle;
-osMessageQId commQueueHandle;
+osThreadId commRxTaskHandle;
+osThreadId commTxTaskHandle;
 osMessageQId cmdQueueHandle;
+osMessageQId commRxQueueHandle;
+osMessageQId commTxQueueHandle;
+osSemaphoreId commTxSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
-char bt_rx_byte;
+
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
-void startCommunicationTask(void const * argument);
 void StartCommandExecuterTask(void const * argument);
+void StartCommRxTask(void const * argument);
+void StartCommTxTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -98,6 +102,11 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of commTxSemaphore */
+  osSemaphoreDef(commTxSemaphore);
+  commTxSemaphoreHandle = osSemaphoreCreate(osSemaphore(commTxSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -111,26 +120,34 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  /* definition and creation of communicationTask */
-  osThreadDef(communicationTask, startCommunicationTask, osPriorityAboveNormal, 0, 128);
-  communicationTaskHandle = osThreadCreate(osThread(communicationTask), NULL);
-
   /* definition and creation of commandExecuterTask */
   osThreadDef(commandExecuterTask, StartCommandExecuterTask, osPriorityAboveNormal, 0, 128);
   commandExecuterTaskHandle = osThreadCreate(osThread(commandExecuterTask), NULL);
+
+  /* definition and creation of commRxTask */
+  osThreadDef(commRxTask, StartCommRxTask, osPriorityHigh, 0, 128);
+  commRxTaskHandle = osThreadCreate(osThread(commRxTask), NULL);
+
+  /* definition and creation of commTxTask */
+  osThreadDef(commTxTask, StartCommTxTask, osPriorityHigh, 0, 128);
+  commTxTaskHandle = osThreadCreate(osThread(commTxTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Create the queue(s) */
-  /* definition and creation of commQueue */
-  osMessageQDef(commQueue, 2, char*);
-  commQueueHandle = osMessageCreate(osMessageQ(commQueue), NULL);
-
   /* definition and creation of cmdQueue */
-  osMessageQDef(cmdQueue, 20, Command_TypeDef*);
+  osMessageQDef(cmdQueue, 20, Command_TypeDef);
   cmdQueueHandle = osMessageCreate(osMessageQ(cmdQueue), NULL);
+
+  /* definition and creation of commRxQueue */
+  osMessageQDef(commRxQueue, 1, char*);
+  commRxQueueHandle = osMessageCreate(osMessageQ(commRxQueue), NULL);
+
+  /* definition and creation of commTxQueue */
+  osMessageQDef(commTxQueue, 10, char*);
+  commTxQueueHandle = osMessageCreate(osMessageQ(commTxQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -142,29 +159,44 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-	osEvent event;
+	/* Infinite loop */
+	for(;;)
+	{
+		HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
+
+		osDelay(100);
+	}
+  /* USER CODE END StartDefaultTask */
+}
+
+/* StartCommandExecuterTask function */
+void StartCommandExecuterTask(void const * argument)
+{
+  /* USER CODE BEGIN StartCommandExecuterTask */
 	Command_TypeDef cmd;
 
   /* Infinite loop */
   for(;;)
   {
-    event = osMessageGet(cmdQueueHandle,osWaitForever);
-    if(event.status != osEventMessage) ErrorBlink();
 
-    cmd = *(Command_TypeDef*) event.value.p;
-    char msg[30];
-    itoa(cmd.Command,msg,10);
-    strcat(msg," to odebrana komenda\r\n");
-    BT_SendMsg_IT(msg);
+	xQueueReceive(cmdQueueHandle,&cmd,portMAX_DELAY);
+
+	char *msg_ptr = pvPortMalloc(30);
+	if(msg_ptr == NULL ) ErrorBlink();
+    unsigned int iParam1 = (unsigned int)cmd.Param;
+    unsigned int iParam2 = (unsigned int)((cmd.Param - iParam1)*1000.0);
+    sprintf(msg_ptr,"%i=%i.%i;\r\n",(unsigned int)cmd.Command,iParam1,iParam2);
+
+    osMessagePut(commTxQueueHandle,(uint32_t)msg_ptr,0);
 
   }
-  /* USER CODE END StartDefaultTask */
+  /* USER CODE END StartCommandExecuterTask */
 }
 
-/* startCommunicationTask function */
-void startCommunicationTask(void const * argument)
+/* StartCommRxTask function */
+void StartCommRxTask(void const * argument)
 {
-  /* USER CODE BEGIN startCommunicationTask */
+  /* USER CODE BEGIN StartCommRxTask */
 	osEvent event;
 	char* msg;
 	CommandList_TypeDef cmdList;
@@ -175,32 +207,43 @@ void startCommunicationTask(void const * argument)
   for(;;)
   {
 
-    event = osMessageGet(commQueueHandle,osWaitForever);
-    if(event.status != osEventMessage) ErrorBlink();
+	  event = osMessageGet(commRxQueueHandle,osWaitForever);
+	  if(event.status != osEventMessage) ErrorBlink();
 
-    msg = (char*)event.value.p;
-	CP_UnpackMsg(msg,&cmdList);
+	  msg = event.value.p;
+	  CP_UnpackMsg(msg,&cmdList);
 
-	while(cmdList.Cnt--){
-		osMessagePut(cmdQueueHandle,(uint32_t)&cmdList.CmdBuff[cmdList.Cnt],0);
-	}
+	  for(uint8_t i=0; i<cmdList.Cnt; i++){
+		Command_TypeDef cmd = cmdList.CmdBuff[i];
+  	    xQueueSendToBack(cmdQueueHandle,&cmd,100);
+	  }
 
-	HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
+	  HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
 
   }
-  /* USER CODE END startCommunicationTask */
+  /* USER CODE END StartCommRxTask */
 }
 
-/* StartCommandExecuterTask function */
-void StartCommandExecuterTask(void const * argument)
+/* StartCommTxTask function */
+void StartCommTxTask(void const * argument)
 {
-  /* USER CODE BEGIN StartCommandExecuterTask */
+  /* USER CODE BEGIN StartCommTxTask */
+	osEvent event;
+	char *msg_ptr = NULL;
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	osSemaphoreWait(commTxSemaphoreHandle,osWaitForever);
+	vPortFree(msg_ptr);
+
+	event = osMessageGet(commTxQueueHandle,osWaitForever);
+    if(event.status != osEventMessage) ErrorBlink();
+
+    msg_ptr = event.value.p;
+    BT_SendMsg_IT(msg_ptr);
   }
-  /* USER CODE END StartCommandExecuterTask */
+  /* USER CODE END StartCommTxTask */
 }
 
 /* USER CODE BEGIN Application */
@@ -210,6 +253,14 @@ void ErrorBlink( void ){
 		HAL_GPIO_TogglePin(LD4_GPIO_Port,LD4_Pin);
 		HAL_Delay(300);
 	}
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+
+	if(huart->Instance == BT_GetInstance()){
+		osSemaphoreRelease(commTxSemaphoreHandle);
+	}
+
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
@@ -223,7 +274,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		CP_StatusTypeDef msgStatus = CP_ComposeMsg(BT_GetRxChar(),msg_buff);
 
 		if(msgStatus == CP_MSG_READY) {
-			queueStatus = osMessagePut(commQueueHandle,(uint32_t)&msg_buff,0);
+			queueStatus = osMessagePut(commRxQueueHandle,(uint32_t)msg_buff,0);
 			if(queueStatus != osOK) ErrorBlink(); // TODO Add some response to full queue problem
 		}
 
