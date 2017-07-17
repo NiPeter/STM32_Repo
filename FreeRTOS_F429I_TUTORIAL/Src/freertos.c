@@ -163,7 +163,7 @@ void startCommunicationTask(void const * argument)
 	char* msg;
 	CommandList_TypeDef cmdList;
 
-	BT_ReceiveChar_IT();
+	BT_ReceiveChar_IT(); // Start BT
 
   /* Infinite loop */
   for(;;)
