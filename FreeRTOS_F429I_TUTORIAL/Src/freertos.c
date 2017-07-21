@@ -163,9 +163,7 @@ void StartDefaultTask(void const * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
 
-		osDelay(1000);
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -174,15 +172,9 @@ void StartDefaultTask(void const * argument)
 void StartCommandExecuterTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommandExecuterTask */
-	Command_TypeDef cmd;
-
   /* Infinite loop */
   for(;;)
   {
-
-	xQueueReceive(cmdQueueHandle,&cmd,portMAX_DELAY);
-
-	xQueueSendToBack(commTxQueueHandle,&cmd,0);
 
   }
   /* USER CODE END StartCommandExecuterTask */
@@ -192,28 +184,9 @@ void StartCommandExecuterTask(void const * argument)
 void StartCommRxTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommRxTask */
-	osEvent event;
-	char* msg;
-	CommandList_TypeDef cmdList;
-
-	BT_ReceiveChar_IT(); // Start BT
-
   /* Infinite loop */
   for(;;)
   {
-
-	  event = osMessageGet(commRxQueueHandle,osWaitForever);
-	  if(event.status != osEventMessage) ErrorBlink();
-
-	  msg = event.value.p;
-	  CP_UnpackMsg(msg,&cmdList);
-
-	  for(uint8_t i=0; i<cmdList.Cnt; i++){
-		Command_TypeDef cmd = cmdList.CmdBuff[i];
-  	    xQueueSendToBack(cmdQueueHandle,&cmd,100);
-	  }
-
-	  HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
 
   }
   /* USER CODE END StartCommRxTask */
@@ -223,20 +196,10 @@ void StartCommRxTask(void const * argument)
 void StartCommTxTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommTxTask */
-
-	Command_TypeDef cmd;
-	char *msg_ptr = pvPortMalloc(15);
-
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreWait(commTxSemaphoreHandle,osWaitForever);
 
-	xQueueReceive(commTxQueueHandle,&cmd,portMAX_DELAY);
-
-    CP_PackMsg(cmd,msg_ptr);
-
-    BT_SendMsg_IT(msg_ptr);
   }
   /* USER CODE END StartCommTxTask */
 }
@@ -253,27 +216,14 @@ void ErrorBlink( void ){
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 
 	if(huart->Instance == BT_GetInstance()){
-		osSemaphoreRelease(commTxSemaphoreHandle);
+
 	}
 
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
-	static char msg_buff[CP_MSG_SIZE];
-
 	if(huart->Instance == BT_GetInstance()){
-
-		osStatus queueStatus;
-
-		CP_StatusTypeDef msgStatus = CP_ComposeMsg(BT_GetRxChar(),msg_buff);
-
-		if(msgStatus == CP_MSG_READY) {
-			queueStatus = osMessagePut(commRxQueueHandle,(uint32_t)msg_buff,0);
-			if(queueStatus != osOK) ErrorBlink(); // TODO Add some response to full queue problem
-		}
-
-		BT_ReceiveChar_IT();
 
 	}
 
