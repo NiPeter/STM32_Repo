@@ -83,6 +83,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+	//A a;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -129,6 +130,7 @@ int main(void)
   /* USER CODE BEGIN 3 */
 
   }
+  return 0;
   /* USER CODE END 3 */
 
 }

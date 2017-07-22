@@ -47,7 +47,7 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Src/gpio.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/main.cpp</name>
+			<name>Application/User/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Src/main.c</locationURI>
 		</link>
