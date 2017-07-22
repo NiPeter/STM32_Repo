@@ -56,6 +56,7 @@
 /* USER CODE BEGIN Includes */
 #include "hc05.h"
 #include "cmd_protocol.h"
+#include "HC05.hpp"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -83,7 +84,6 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-	//A a;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -108,8 +108,6 @@ int main(void)
   MX_ADC1_Init();
 
   /* USER CODE BEGIN 2 */
-
- // BT_Init(&huart1,NULL,0);
 
   /* USER CODE END 2 */
 

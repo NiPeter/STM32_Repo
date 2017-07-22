@@ -9,6 +9,7 @@
 #define APPLICATION_USER_SERIAL_HC05_HPP_
 
 #include "Serial.hpp"
+#include "List.hpp"
 
 /***	Hardware STM32	***/
 #include "stm32f4xx_hal.h"
@@ -21,32 +22,45 @@
 class HC05 : public Serial{
 private:
 
+	// Hardware handles
 	UART_HandleTypeDef* hUART = NULL;
 	GPIO_TypeDef* hKeyPort = NULL;
 	uint16_t keyPin;
 
-	osThreadId taskID;
+	// Tx and Rx Buffers
+	List<char> RxBuffer;
+	List<char> TxBuffer;
+
+	// Tx and Rx Bytes
+	unsigned char rxByte;	// Receive Byte
+	unsigned char txByte;	// Transmit Byte
+
+	bool txOn; // True when transmition is on
 
 public:
+
 	HC05(UART_HandleTypeDef* huart, GPIO_TypeDef* key_port, uint16_t key_pin);
 	virtual ~HC05();
 
-	virtual void begin();
-	virtual void end();
 
-	virtual int writeChar(char c);
-	virtual int writeStr(const char* str);
+	virtual void begin();
+
+	virtual void writeChar(char c);
+	virtual void writeStr(const char* str);
 
 	virtual char readChar();
 
 	virtual bool isAvailable();
 
-	UART_HandleTypeDef* getUARTInstance(){ return hUART; };
+	USART_TypeDef* getUARTInstance(){ return hUART->Instance; };
 
+	void processRxISR();
+	void processTxISR();
 
 private:
 
-	void threadTask(void const * argument);
+	void receiveIT();
+	void transmitIT( char data );
 
 };
 

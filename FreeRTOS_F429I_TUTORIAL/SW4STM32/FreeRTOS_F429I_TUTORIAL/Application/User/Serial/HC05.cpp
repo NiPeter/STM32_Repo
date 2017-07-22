@@ -8,37 +8,177 @@
 
 #include "HC05.hpp"
 
-/********************************************************/
-void HC05::begin(){
 
-}
-/********************************************************/
-
-
-
+/**
+ * HC05 Constructor
+ * @param huart
+ * @param key_port
+ * @param key_pin
+ */
 /********************************************************/
 HC05::HC05(UART_HandleTypeDef* huart, GPIO_TypeDef* key_port, uint16_t key_pin):
 				hUART(huart),
 				hKeyPort(key_port),
-				keyPin(key_pin){
-
-	osThreadDef(HC05, threadTask, osPriorityNormal, 0, 128);
-	taskID = osThreadCreate(osThread(HC05), NULL);
-
-};
+				keyPin(key_pin),
+				txOn(false){};
 /********************************************************/
 
-
-
+/**
+ * HC05 Destructor
+ */
 /********************************************************/
-void HC05::threadTask(void const * arguments){
+HC05::~HC05(){
 
-	for(;;){
-
-	}
 }
 /********************************************************/
 
 
 
+/**
+ * Begin listening
+ */
+/********************************************************/
+void HC05::begin(){
+
+	receiveIT();
+
+}
+/********************************************************/
+
+
+
+/**
+ * Read character
+ * @return
+ */
+/********************************************************/
+char HC05::readChar(){
+
+	while( RxBuffer.IsEmpty() ); // Wait for data
+
+	return RxBuffer.Pop();
+}
+/********************************************************/
+
+
+
+/**
+ * Is data available to read?
+ * @return
+ */
+/********************************************************/
+bool HC05::isAvailable(){
+	return !RxBuffer.IsEmpty();
+}
+/********************************************************/
+
+
+
+/**
+ * Write character to stream
+ * @param c
+ * @return
+ */
+/********************************************************/
+void HC05::writeChar(char c){
+
+	if( !txOn ) {
+		transmitIT(c);
+		return;
+	}
+
+	TxBuffer.Push(c);
+}
+/********************************************************/
+
+
+
+/**
+ * Write string to buffer
+ * @param str
+ */
+/********************************************************/
+void HC05::writeStr(const char* str){
+
+	while(*str){
+		writeChar(*str);
+		str++;
+	}
+
+
+
+}
+/********************************************************/
+
+
+
+
+
+/**
+ * Receive Interrupt Service Routine function
+ *
+ * Must be called from USART Rx ISR
+ */
+/********************************************************/
+void HC05::processRxISR(){
+
+	RxBuffer.Push(rxByte);
+	receiveIT();
+
+}
+/********************************************************/
+
+
+
+/**
+ * Transmit Interrupt Service Routine function
+ *
+ * Must be called from USART Tx ISR
+ */
+/********************************************************/
+void HC05::processTxISR(){
+
+	if( TxBuffer.IsEmpty() ){
+		txOn = false;
+		return;
+	}
+	transmitIT( TxBuffer.Pop() );
+
+}
+/********************************************************/
+
+
+
+
+/********************************************************/
+/***	Private Functions	***/
+/********************************************************/
+/********************************************************/
+
+
+/**
+ * Receive char in IT mode
+ */
+/********************************************************/
+void HC05::receiveIT(){
+
+	HAL_UART_Receive_IT(hUART,&rxByte,1);
+
+}
+/********************************************************/
+
+
+
+/**
+ * Transmit char in IT mode
+ * @param data
+ */
+/********************************************************/
+void HC05::transmitIT( char data ){
+
+	txByte = data;
+	HAL_UART_Transmit_IT(hUART,&txByte,1);
+
+}
+/********************************************************/
 

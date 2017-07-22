@@ -12,20 +12,21 @@
 class Serial{
 
 public:
-	Serial();
-	virtual ~Serial();
+//	virtual ~Serial();
 
-	virtual void begin();
-	virtual void end();
+	virtual void begin() = 0;
 
-	virtual int writeChar(char c);
-	virtual int writeStr(const char* str);
+	virtual void writeChar(char c) = 0;
+	virtual void writeStr(const char* str) = 0;
 
-	virtual char readChar();
+	virtual char readChar() = 0;
 
-	virtual bool isAvailable();
+	virtual bool isAvailable() = 0;
 
 };
 
+//Serial::~Serial(){
+//
+//}
 
 #endif /* APPLICATION_USER_SERIAL_SERIAL_HPP_ */

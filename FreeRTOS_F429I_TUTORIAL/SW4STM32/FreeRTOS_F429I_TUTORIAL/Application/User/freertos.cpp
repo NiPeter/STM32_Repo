@@ -56,6 +56,7 @@
 /***	STM INCLUDES	***/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "usart.h"
 
 /***	COMMUNICATION INCLUDES	***/
 #include "hc05.h"
@@ -63,6 +64,7 @@
 
 /***	OTHERS	***/
 #include "List.hpp"
+#include "HC05.hpp"
 
 /* USER CODE END Includes */
 
@@ -72,6 +74,7 @@ osSemaphoreId commTxSemaphoreHandle;
 
 
 /* USER CODE BEGIN Variables */
+HC05 Bluetooth( &huart1, NULL, 0);
 
 /* USER CODE END Variables */
 
@@ -129,43 +132,21 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-	List<int> list;
-	List<float> listF;
 
-	int i = 0;
-	float f = 0.32;
+	Bluetooth.begin();
+	char data;
 
-	int cnt = 243;
-	int memory;
 	/* Infinite loop */
 	for(;;)
 	{
+		while( Bluetooth.isAvailable() ){
+			data = Bluetooth.readChar();
 
-		f = cnt*f/(1+i+f)+memory/100.2;
-		listF.Push(f);
-
-		list.Push(i++);
-
-		cnt = listF.Count();
-
-		memory = xPortGetFreeHeapSize();
-
-
-		{
-			List<char> listC;
-			for(char i=0;i<20;i++){
-				listC.Push(i);
-			}
-			memory = xPortGetFreeHeapSize();
+			Bluetooth.writeChar(data);
 
 		}
 
-		listF.Pop();
-		list.Pop();
-
-		memory = xPortGetFreeHeapSize();
-
-		osDelay(1);
+		osDelay(10);
 
 	}
   /* USER CODE END StartDefaultTask */
@@ -180,21 +161,19 @@ void ErrorBlink( void ){
 	}
 }
 
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-//
-//	if(huart->Instance == BT_GetInstance()){
-//
-//	}
-//
-//}
-//
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-//
-//	if(huart->Instance == BT_GetInstance()){
-//
-//	}
-//
-//}
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+
+	if(huart->Instance == Bluetooth.getUARTInstance())
+		Bluetooth.processTxISR();
+
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+	if(huart->Instance == Bluetooth.getUARTInstance())
+		Bluetooth.processRxISR();
+
+}
 
 /* USER CODE END Application */
 
