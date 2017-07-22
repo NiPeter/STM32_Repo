@@ -52,7 +52,8 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-
+#include "usart.h"
+#include "HC05.hpp"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -63,7 +64,7 @@ osSemaphoreId bluetoothTxSemaphoreHandle;
 osSemaphoreId bluetoothRxSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
-
+HC05 Bluetooth(&huart1,NULL,1);
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -83,11 +84,11 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-       
+
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+	/* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
@@ -100,11 +101,11 @@ void MX_FREERTOS_Init(void) {
   bluetoothRxSemaphoreHandle = osSemaphoreCreate(osSemaphore(bluetoothRxSemaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+	/* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+	/* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the thread(s) */
@@ -113,19 +114,19 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of bluetoothTx */
-  osThreadDef(bluetoothTx, StartBluetoothTx, osPriorityAboveNormal, 0, 256);
+  osThreadDef(bluetoothTx, StartBluetoothTx, osPriorityAboveNormal, 0, 128);
   bluetoothTxHandle = osThreadCreate(osThread(bluetoothTx), NULL);
 
   /* definition and creation of bluetoothRx */
-  osThreadDef(bluetoothRx, StartBluetoothRx, osPriorityAboveNormal, 0, 256);
+  osThreadDef(bluetoothRx, StartBluetoothRx, osPriorityAboveNormal, 0, 128);
   bluetoothRxHandle = osThreadCreate(osThread(bluetoothRx), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+	/* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 }
 
@@ -134,11 +135,24 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	char data;
+
+	Bluetooth.begin();
+	/* Infinite loop */
+	for(;;)
+	{
+		while( Bluetooth.isAvailable() ){
+			data = Bluetooth.readChar();
+
+			int memory = xPortGetFreeHeapSize();
+			char msg[80];
+			sprintf(msg,"FreeHeap = %i B \tWyslales: %c\r\n",memory,data);
+
+			Bluetooth.writeStr(msg);
+
+		}
+		osDelay(10);
+	}
   /* USER CODE END StartDefaultTask */
 }
 
@@ -146,11 +160,14 @@ void StartDefaultTask(void const * argument)
 void StartBluetoothTx(void const * argument)
 {
   /* USER CODE BEGIN StartBluetoothTx */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	osSemaphoreWait(bluetoothTxSemaphoreHandle,osWaitForever);
+	/* Infinite loop */
+	for(;;)
+	{
+		osSemaphoreWait(bluetoothTxSemaphoreHandle,osWaitForever);
+		Bluetooth.processTxISR();
+	}
   /* USER CODE END StartBluetoothTx */
 }
 
@@ -158,16 +175,31 @@ void StartBluetoothTx(void const * argument)
 void StartBluetoothRx(void const * argument)
 {
   /* USER CODE BEGIN StartBluetoothRx */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	osSemaphoreWait(bluetoothRxSemaphoreHandle,osWaitForever);
+	/* Infinite loop */
+	for(;;)
+	{
+		osSemaphoreWait(bluetoothRxSemaphoreHandle,osWaitForever);
+		Bluetooth.processRxISR();
+	}
   /* USER CODE END StartBluetoothRx */
 }
 
 /* USER CODE BEGIN Application */
-     
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+
+	if(huart->Instance == Bluetooth.getUARTInstance())
+		osSemaphoreRelease(bluetoothTxSemaphoreHandle);
+
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+	if(huart->Instance == Bluetooth.getUARTInstance())
+		osSemaphoreRelease(bluetoothRxSemaphoreHandle);
+
+}
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
