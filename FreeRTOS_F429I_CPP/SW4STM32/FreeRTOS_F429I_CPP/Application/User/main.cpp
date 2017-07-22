@@ -46,7 +46,13 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "main.h"
+#ifdef __cplusplus
+}
+#endif
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 #include "adc.h"

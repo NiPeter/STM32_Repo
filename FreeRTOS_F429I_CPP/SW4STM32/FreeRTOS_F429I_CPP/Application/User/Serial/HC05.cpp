@@ -176,6 +176,7 @@ void HC05::receiveIT(){
 /********************************************************/
 void HC05::transmitIT( char data ){
 
+	txOn = true;
 	txByte = data;
 	HAL_UART_Transmit_IT(hUART,&txByte,1);
 
