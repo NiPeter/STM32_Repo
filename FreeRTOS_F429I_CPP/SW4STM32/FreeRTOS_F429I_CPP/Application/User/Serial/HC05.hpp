@@ -39,11 +39,12 @@ private:
 
 public:
 
-	HC05(UART_HandleTypeDef* huart, GPIO_TypeDef* key_port, uint16_t key_pin);
+	HC05(UART_HandleTypeDef* huart, GPIO_TypeDef* key_port = NULL, uint16_t key_pin = 0);
 	virtual ~HC05();
 
 
 	virtual void begin();
+	virtual void flush();
 
 	virtual void writeChar(char c);
 	virtual void writeStr(const char* str);

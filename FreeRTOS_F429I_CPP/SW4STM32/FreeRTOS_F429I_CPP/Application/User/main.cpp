@@ -50,9 +50,6 @@
 extern "C" {
 #endif
 #include "main.h"
-#ifdef __cplusplus
-}
-#endif
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 #include "adc.h"
@@ -60,7 +57,9 @@ extern "C" {
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#ifdef __cplusplus
+}
+#endif
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/

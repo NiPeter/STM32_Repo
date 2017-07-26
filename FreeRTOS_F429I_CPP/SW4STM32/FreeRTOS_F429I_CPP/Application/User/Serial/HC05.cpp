@@ -20,7 +20,7 @@ HC05::HC05(UART_HandleTypeDef* huart, GPIO_TypeDef* key_port, uint16_t key_pin):
 				hUART(huart),
 				hKeyPort(key_port),
 				keyPin(key_pin),
-				txOn(false){};
+				txOn(false){ rxByte = 0; txByte = 0;};
 /********************************************************/
 
 /**
@@ -42,6 +42,18 @@ void HC05::begin(){
 
 	receiveIT();
 
+}
+/********************************************************/
+
+
+
+/**
+ * Clear RxBuffer
+ */
+/********************************************************/
+void HC05::flush(){
+	while( !RxBuffer.IsEmpty())
+		RxBuffer.Pop();
 }
 /********************************************************/
 

@@ -12,9 +12,10 @@
 class Serial{
 
 public:
-//	virtual ~Serial();
+	virtual ~Serial(){};
 
 	virtual void begin() = 0;
+	virtual void flush() = 0;
 
 	virtual void writeChar(char c) = 0;
 	virtual void writeStr(const char* str) = 0;
