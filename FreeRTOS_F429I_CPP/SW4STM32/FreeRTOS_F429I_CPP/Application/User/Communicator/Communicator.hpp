@@ -11,14 +11,21 @@
 #include "Command.hpp"
 #include "Serial.hpp"
 
+
+#include "stdlib.h"
+
 class Communicator
 {
+	static const char CP_MSG_SIZE = 30;
 	Serial* SerialPort;
+
 public:
+	int freeHeap;
+
 	Communicator(Serial* serial);
 	~Communicator();
 
-	Command receiveCmd();
+	Command receiveCmd(bool *cmdReceived = NULL);
 	void sendCmd(Command cmd);
 
 private:

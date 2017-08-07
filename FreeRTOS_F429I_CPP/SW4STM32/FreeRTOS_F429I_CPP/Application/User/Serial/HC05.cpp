@@ -112,7 +112,7 @@ void HC05::writeChar(char c){
 /********************************************************/
 void HC05::writeStr(const char* str){
 
-	while(*str){
+	while((*str) != '\0'){
 		writeChar(*str);
 		str++;
 	}

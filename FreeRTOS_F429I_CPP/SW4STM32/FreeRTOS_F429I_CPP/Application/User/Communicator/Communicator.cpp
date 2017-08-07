@@ -25,7 +25,7 @@ static unsigned int orderOfMagnitude(int number,unsigned int nZeros = 0);
 
 /********************************************************/
 /***	Public Functions
-*********************************************************/
+ *********************************************************/
 
 /**
  * Constructor
@@ -55,38 +55,39 @@ Communicator::~Communicator()
  * @return
  */
 /********************************************************/
-Command Communicator::receiveCmd()
+Command Communicator::receiveCmd(bool *cmdReceived)
 {
-	const char CP_MSG_SIZE = 30;
-	char c;
-	char msg[CP_MSG_SIZE] = "";
 
-	unsigned int index = 0;
-	while(true){
+	char c;
+	static char msg[CP_MSG_SIZE];
+	static int index=0;
+
+	while( index<CP_MSG_SIZE ){
+
+		if( SerialPort->isAvailable() == false ) break;
+
 		c = SerialPort->readChar();
 
 		if(c == '\n'){
 			// Terminate string with null character
-//			msg[index] = '\0';
-			strcat(msg,'\0');
-			break;
-		}
+			msg[index] = '\0';
+			index = 0;
+			//			strcat(msg,'\0');
+			if(cmdReceived != NULL)	*cmdReceived = true;
+			return unpackMsg(msg);
 
-		if(c != '\r'){
+		}else if(c != '\r'){
 			//Receive byte and save it to data_buffer
-			strcat(msg,&c);
-
-			//msg[index] = c;
-
-			// Check msg size
-			if(++index==CP_MSG_SIZE){
-				index = 0;
-				return Command(Fail);
-			}
+			//			strcat(msg,&c);
+			msg[index] = c;
 		}
+		index++;
 	}
 
-	return unpackMsg(msg);
+	if(index==CP_MSG_SIZE) index = 0;
+
+	if(cmdReceived != NULL)	*cmdReceived = false;
+	return Command(Fail);
 }
 /********************************************************/
 
@@ -99,7 +100,7 @@ Command Communicator::receiveCmd()
 /********************************************************/
 void Communicator::sendCmd(Command cmd)
 {
-	char msg[15];
+	char msg[CP_MSG_SIZE+2]; // +2 for terminating characters store
 	SerialPort->writeStr(packMsg(cmd,msg));
 }
 /********************************************************/
@@ -110,7 +111,7 @@ void Communicator::sendCmd(Command cmd)
 
 /********************************************************/
 /***	Private Functions
-*********************************************************/
+ *********************************************************/
 
 /**
  * Unpack command from msg string
@@ -138,8 +139,9 @@ Command Communicator::unpackMsg(const char * msg)
 /********************************************************/
 char * Communicator::packMsg(Command cmd, char * msg)
 {
-	char cmdStr[4];
-	char paramStr[10];
+	const char CMDSTR_SIZE = 3;
+	char cmdStr[CMDSTR_SIZE];
+	char paramStr[CP_MSG_SIZE-CMDSTR_SIZE-3]; // -3 for = and \r\n
 
 	itoa(cmd.getType(),cmdStr,10);
 	strFromFloat(cmd.getParam(),paramStr);
@@ -174,31 +176,31 @@ CmdType_e Communicator::cmdTypeFromMsg(const char* msg){
 float Communicator::paramFromMsg(const char* msg){
 	const char * token = msg;
 
-		token += strcspn(msg, "="); // Szukaj znaku "=" i przesuñ tam token
+	token += strcspn(msg, "="); // Szukaj znaku "=" i przesuñ tam token
 
-		if (*token != '=') return 0; // Brak "=" w wiadomoœci
+	if (*token != '=') return 0; // Brak "=" w wiadomoœci
 
-		if (*(++token) == 0) return 0; // Jest "=" ale nic za nim
+	if (*(++token) == 0) return 0; // Jest "=" ale nic za nim
 
-		int param_int = atoi(token); // pobierz wartoœæ ca³kowit¹ parametru
+	int param_int = atoi(token); // pobierz wartoœæ ca³kowit¹ parametru
 
-		token += strcspn(token, "."); // Szukaj kropki i  przesuñ na ni¹ wskaŸnik
-		if (*token != '\0') {	// Je¿eli wskaŸnik NIE wskazuje koniec stringa to szukamy wartoœci u³amkowej
-			int param_frac;
+	token += strcspn(token, "."); // Szukaj kropki i  przesuñ na ni¹ wskaŸnik
+	if (*token != '\0') {	// Je¿eli wskaŸnik NIE wskazuje koniec stringa to szukamy wartoœci u³amkowej
+		int param_frac;
 
-			token++;	// Przesuñ wskaŸnik na wartoœæ u³amkow¹ i...
-			param_frac = atoi(token); // pobierz wartoœæ u³amkow¹ parametru
+		token++;	// Przesuñ wskaŸnik na wartoœæ u³amkow¹ i...
+		param_frac = atoi(token); // pobierz wartoœæ u³amkow¹ parametru
 
-			unsigned int nZeros = 0;
-			while (*token == '0') {
-				token++;
-				nZeros++;
-			}
-
-			return floatFrom2Ints(param_int, param_frac,nZeros);	// Z³ó¿ dwa inty w floata
+		unsigned int nZeros = 0;
+		while (*token == '0') {
+			token++;
+			nZeros++;
 		}
 
-		return (float)param_int; // Je¿eli nie ma wartoœci po . to parametr jest ca³kowity, zapisz go
+		return floatFrom2Ints(param_int, param_frac,nZeros);	// Z³ó¿ dwa inty w floata
+	}
+
+	return (float)param_int; // Je¿eli nie ma wartoœci po . to parametr jest ca³kowity, zapisz go
 }
 /********************************************************/
 
@@ -209,7 +211,7 @@ float Communicator::paramFromMsg(const char* msg){
 
 /********************************************************/
 /***	Static Functions
-*********************************************************/
+ *********************************************************/
 
 
 static void intsFromFloat(float floatNumber, int *intPart, unsigned int *fracPartNominator, unsigned int *fracPartDenominator) {
@@ -224,7 +226,7 @@ static void intsFromFloat(float floatNumber, int *intPart, unsigned int *fracPar
 
 static void strFromFloat(float param, char * result) {
 	char result_t[30];
-	char temp[10];
+	char temp[20];
 
 	int i;
 	unsigned int n, d;
