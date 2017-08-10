@@ -15,6 +15,8 @@
 
 /***	static functions	***/
 
+static char * ftostr(float num, char * str);
+
 static float floatFrom2Ints(int intPart, int fracPart, unsigned int nZeros = 0);
 static void intsFromFloat(float floatNumber, int *intPart, unsigned int *fracPartNominator, unsigned int *fracPartDenominator);
 static void strFromFloat(float param, char * result);
@@ -79,9 +81,9 @@ Command Communicator::receiveCmd(bool *cmdReceived)
 		}else if(c != '\r'){
 			//Receive byte and save it to data_buffer
 			//			strcat(msg,&c);
-			msg[index] = c;
+			msg[index++] = c;
 		}
-		index++;
+		//index++;
 	}
 
 	if(index==CP_MSG_SIZE) index = 0;
@@ -144,7 +146,8 @@ char * Communicator::packMsg(Command cmd, char * msg)
 	char paramStr[CP_MSG_SIZE-CMDSTR_SIZE-3]; // -3 for = and \r\n
 
 	itoa(cmd.getType(),cmdStr,10);
-	strFromFloat(cmd.getParam(),paramStr);
+	//strFromFloat(cmd.getParam(),paramStr);
+	ftostr(cmd.getParam(),paramStr);
 
 	sprintf(msg,"%s=%s\r\n",cmdStr,paramStr);
 
@@ -212,7 +215,19 @@ float Communicator::paramFromMsg(const char* msg){
 /********************************************************/
 /***	Static Functions
  *********************************************************/
+static char * ftostr(float num, char * str){
 
+	const char *tmpSign = (num < 0) ? "-" : "";
+	float tmpVal = (num < 0) ? -num : num;
+
+	int tmpInt1 = tmpVal;                  	// Get the integer (678).
+	float tmpFrac = tmpVal - tmpInt1;      	// Get fraction (0.0123).
+	int tmpInt2 = int(tmpFrac * 10000);  	// Turn into integer (123).
+
+	sprintf (str, "%s%d.%04d", tmpSign, tmpInt1, tmpInt2);
+
+	return str;
+}
 
 static void intsFromFloat(float floatNumber, int *intPart, unsigned int *fracPartNominator, unsigned int *fracPartDenominator) {
 

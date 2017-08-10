@@ -46,9 +46,6 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
@@ -182,10 +179,6 @@ void SystemClock_Config(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-    /**Enables the Clock Security System 
-    */
-  HAL_RCC_EnableCSS();
 
     /**Configure the Systick interrupt time 
     */

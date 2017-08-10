@@ -53,8 +53,10 @@
 
 /* USER CODE BEGIN Includes */
 #include "usart.h"
+#include "tim.h"
 #include "HC05.hpp"
 #include "Communicator.hpp"
+#include "Servo.hpp"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -68,7 +70,8 @@ osSemaphoreId bluetoothRxSemaphoreHandle;
 
 HC05 Bluetooth(&huart1);
 Communicator Comm(&Bluetooth);
-Command cmd(Fail);
+
+Servo Servo1(&htim2,TIM_CHANNEL_2,50);
 
 /* USER CODE END Variables */
 
@@ -141,34 +144,45 @@ void StartDefaultTask(void const * argument)
 
   /* USER CODE BEGIN StartDefaultTask */
 
-
-	int i=0;
-	unsigned int freeHeap = xPortGetFreeHeapSize();
-	unsigned int used = configTOTAL_HEAP_SIZE - freeHeap;
 	Bluetooth.begin();
-
+	Servo1.start();
+	Servo1.setPos(180);
+	Command cmd(Fail);
 
 	/* Infinite loop */
 	for(;;)
 	{
-		freeHeap = xPortGetFreeHeapSize();
-		used = configTOTAL_HEAP_SIZE - freeHeap;
-		bool flush = false;
-		if(flush) Bluetooth.flush();
+
 
 		bool cmdReceived = false;
 		cmd = Comm.receiveCmd(&cmdReceived);
-//		Command cmd = Command((CmdType_e)i,i/100.0);//Comm.receiveCmd(&cmdReceived);
-//
-//		freeHeap = xPortGetFreeHeapSize();
+
 		if( cmdReceived == true ){
-			i++;
 			Bluetooth.writeStr("Odebrano komende\r\n");
 			Comm.sendCmd(cmd);
-		}else Bluetooth.writeStr("\nWait...\r");
-//
-		freeHeap = xPortGetFreeHeapSize();
-		used = configTOTAL_HEAP_SIZE - freeHeap;
+			if(cmd.getType() == Set){
+				float param = cmd.getParam();
+
+				Servo1.setPos(param);
+
+				char str[60];
+				/********************************************************/ //TODO TAK WYSY£AÆ FLOAT!
+				{
+					const char *tmpSign = (param < 0) ? "-" : "";
+					float tmpVal = (param < 0) ? -param : param;
+
+					int tmpInt1 = tmpVal;                  	// Get the integer (678).
+					float tmpFrac = tmpVal - tmpInt1;      	// Get fraction (0.0123).
+					int tmpInt2 = int(tmpFrac * 10000);  	// Turn into integer (123).
+
+					sprintf (str, "Ustawiam: %s%d.%04d\r\n", tmpSign, tmpInt1, tmpInt2);
+				}
+				/********************************************************/
+				Bluetooth.writeStr(str);
+
+			}
+		};//else Bluetooth.writeStr("\nWait...\r");
+
 		osDelay(200);
 
 	}

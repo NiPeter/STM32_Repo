@@ -23,17 +23,19 @@ private:
 	unsigned int		Resolution;		// PWM resolution
 
 public:
-	Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm, unsigned int resolution = 1000);
+	Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm, unsigned int resolution = 2000);
 
-	void Start( void );
-	void Stop( void );
+	void start( void );
+	void stop( void );
 
-	void SetPos(float deg);
-	float GetPos( void );
+	void setPos(float deg);
+	float getPos( void );
+
+	void calibrate(float min, float max);
 
 private:
-	float AngToMs( float angle);
-	uint16_t MsToCCR( float ms);
+	float angToMs( float angle);
+	uint16_t msToCCR( float ms);
 
 };
 

@@ -38,6 +38,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.2132087464" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=__attribute__((weak))" />
@@ -65,6 +67,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1310091358" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=__attribute__((weak))" />
@@ -100,6 +104,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.510667507" superClass="cdt.managedbuild.tool.gnu.assembler.input" />
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.assembler.input.1321207021" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.input" />
@@ -107,7 +113,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Application/User/freertos.c|Application/User/main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="" />
+						<entry excluding="Application/User/IKController/structInitFnc/rtGetNaN.c|Application/User/IKController/structInitFnc/rtGetInf.c|Application/User/IKController/structInitFnc/rt_nonfinite.c|Application/User/IKController/structInitFnc/interface|Application/User/IKController/structInitFnc/html|Application/User/IKController/structInitFnc/examples|Application/User/IKController/servoIK/interface|Application/User/IKController/servoIK/html|Application/User/IKController/servoIK/examples|Application/User/freertos.c|Application/User/main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="" />
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -150,6 +156,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.2132087464" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=__attribute__((weak))" />
@@ -176,6 +184,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1164185325" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=__attribute__((weak))" />
@@ -210,6 +220,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Serial}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/Communicator}&quot;" />
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/servoIK}&quot;" />
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS_F429I_CPP/Application/User/IKController/structInitFnc}&quot;" />
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.510667507" superClass="cdt.managedbuild.tool.gnu.assembler.input" />
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.assembler.input.1321207021" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.input" />
@@ -217,7 +229,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Application/User/freertos.c|Application/User/main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="" />
+						<entry excluding="Application/User/IKController/structInitFnc/rtGetNaN.c|Application/User/IKController/structInitFnc/rtGetInf.c|Application/User/IKController/structInitFnc/rt_nonfinite.c|Application/User/IKController/structInitFnc/interface|Application/User/IKController/structInitFnc/html|Application/User/IKController/structInitFnc/examples|Application/User/IKController/servoIK/interface|Application/User/IKController/servoIK/html|Application/User/IKController/servoIK/examples|Application/User/freertos.c|Application/User/main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="" />
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -251,4 +263,5 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="" />
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets" />
 </cproject>

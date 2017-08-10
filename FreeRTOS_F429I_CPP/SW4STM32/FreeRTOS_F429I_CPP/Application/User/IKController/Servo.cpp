@@ -16,8 +16,8 @@
 /********************************************************/
 Servo::Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm, unsigned int resolution)
 :hTIM(htim),Channel(channel),Frequency(freq_pwm),Resolution(resolution){
-	ms_min = 0;
-	ms_max = 1.5;
+	ms_min = 0.5;
+	ms_max = 2.26;
 }
 /********************************************************/
 
@@ -25,7 +25,7 @@ Servo::Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm, 
  *
  */
 /********************************************************/
-void Servo::Start( void ){
+void Servo::start( void ){
 
 	HAL_TIM_PWM_Start(hTIM,Channel);
 
@@ -38,7 +38,7 @@ void Servo::Start( void ){
  *
  */
 /********************************************************/
-void Servo::Stop( void ){
+void Servo::stop( void ){
 
 	HAL_TIM_PWM_Stop(hTIM,Channel);
 
@@ -52,10 +52,10 @@ void Servo::Stop( void ){
  * @param deg
  */
 /********************************************************/
-void Servo::SetPos(float deg){
+void Servo::setPos(float deg){
 	uint16_t CCR;
 
-	CCR = MsToCCR( AngToMs( deg ) );
+	CCR = msToCCR( angToMs( deg ) );
 	__HAL_TIM_SET_COMPARE(hTIM,Channel,CCR);
 }
 /********************************************************/
@@ -67,7 +67,7 @@ void Servo::SetPos(float deg){
  * @return
  */
 /********************************************************/
-float Servo::GetPos( void ){
+float Servo::getPos( void ){
 	uint16_t CCR;
 
 	CCR = __HAL_TIM_GET_COMPARE(hTIM,Channel);
@@ -76,16 +76,23 @@ float Servo::GetPos( void ){
 /********************************************************/
 
 
+void Servo::calibrate(float min, float max){
+	if( max <= min ) return;
+
+	ms_min = min;
+	ms_max = max;
+}
 
 
+/********************************************************/
 
-float Servo::AngToMs( float angle){
+float Servo::angToMs( float angle){
 	float dms = ms_max - ms_min;
 
 	return dms/180.0*angle + ms_min;
 }
 
-uint16_t Servo::MsToCCR( float ms ){
+uint16_t Servo::msToCCR( float ms ){
 
 
 	return ms*Frequency*Resolution/1000.0;

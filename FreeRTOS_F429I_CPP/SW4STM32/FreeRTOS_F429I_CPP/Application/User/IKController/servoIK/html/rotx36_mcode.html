@@ -1,0 +1,46 @@
+<!-- saved from url=(0014)about:internet -->
+<pre class="code">
+<span class="srcline"><span class="lineno"><a href="22,1" id="srcline1"> 1</a></span><span class="line"><span class="comment">%ROTX Rotation about X axis</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,2" id="srcline2"> 2</a></span><span class="line"><span class="comment">%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,3" id="srcline3"> 3</a></span><span class="line"><span class="comment">% R = ROTX(THETA) is an SO(3) rotation matrix (3x3) representing a rotation of THETA </span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,4" id="srcline4"> 4</a></span><span class="line"><span class="comment">% radians about the x-axis.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,5" id="srcline5"> 5</a></span><span class="line"><span class="comment">%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,6" id="srcline6"> 6</a></span><span class="line"><span class="comment">% R = ROTX(THETA, 'deg') as above but THETA is in degrees.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,7" id="srcline7"> 7</a></span><span class="line"><span class="comment">%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,8" id="srcline8"> 8</a></span><span class="line"><span class="comment">% See also ROTY, ROTZ, ANGVEC2R, ROT2.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,9" id="srcline9"> 9</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="22,10" id="srcline10">10</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="22,11" id="srcline11">11</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="22,12" id="srcline12">12</a></span><span class="line"><span class="comment">% Copyright (C) 1993-2015, by Peter I. Corke</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,13" id="srcline13">13</a></span><span class="line"><span class="comment">%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,14" id="srcline14">14</a></span><span class="line"><span class="comment">% This file is part of The Robotics Toolbox for MATLAB (RTB).</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,15" id="srcline15">15</a></span><span class="line"><span class="comment">% </span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,16" id="srcline16">16</a></span><span class="line"><span class="comment">% RTB is free software: you can redistribute it and/or modify</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,17" id="srcline17">17</a></span><span class="line"><span class="comment">% it under the terms of the GNU Lesser General Public License as published by</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,18" id="srcline18">18</a></span><span class="line"><span class="comment">% the Free Software Foundation, either version 3 of the License, or</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,19" id="srcline19">19</a></span><span class="line"><span class="comment">% (at your option) any later version.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,20" id="srcline20">20</a></span><span class="line"><span class="comment">% </span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,21" id="srcline21">21</a></span><span class="line"><span class="comment">% RTB is distributed in the hope that it will be useful,</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,22" id="srcline22">22</a></span><span class="line"><span class="comment">% but WITHOUT ANY WARRANTY; without even the implied warranty of</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,23" id="srcline23">23</a></span><span class="line"><span class="comment">% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,24" id="srcline24">24</a></span><span class="line"><span class="comment">% GNU Lesser General Public License for more details.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,25" id="srcline25">25</a></span><span class="line"><span class="comment">% </span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,26" id="srcline26">26</a></span><span class="line"><span class="comment">% You should have received a copy of the GNU Leser General Public License</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,27" id="srcline27">27</a></span><span class="line"><span class="comment">% along with RTB.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,28" id="srcline28">28</a></span><span class="line"><span class="comment">%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,29" id="srcline29">29</a></span><span class="line"><span class="comment">% http://www.petercorke.com</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,30" id="srcline30">30</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="22,31" id="srcline31">31</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S2T8U3">R</span> = rotx(<span class="var type1" id="S3T4U6">t</span>, <span class="var type0" id="S4T0U7">deg</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="22,32" id="srcline32">32</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="22,33" id="srcline33">33</a></span><span class="line">    <span class="keyword">if</span> nargin &gt; 1 &amp;&amp; strcmp(<span class="var type0" id="S4T0U17">deg</span>, <span class="string">'deg'</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="22,34" id="srcline34">34</a></span><span class="line">        <span class="var type0" id="S3T0U21">t</span> = <span class="var type0" id="S3T0U24">t</span> *pi/180;</span></span>
+<span class="srcline"><span class="lineno"><a href="22,35" id="srcline35">35</a></span><span class="line">    <span class="keyword">end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,36" id="srcline36">36</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="22,37" id="srcline37">37</a></span><span class="line">    <span class="mxinfo " id="T4:U3"><span class="var type1" id="S8T4U30">ct</span> = <span class="mxinfo " id="T4:U5">cos(<span class="var type1" id="S3T4U33">t</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="22,38" id="srcline38">38</a></span><span class="line">    <span class="mxinfo " id="T4:U7"><span class="var type1" id="S10T4U36">st</span> = <span class="mxinfo " id="T4:U9">sin(<span class="var type1" id="S3T4U39">t</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="22,39" id="srcline39">39</a></span><span class="line">    <span class="mxinfo " id="T8:U11"><span class="var type1" id="S2T8U42">R</span> = <span class="mxinfo " id="T8:U13">[</span></span>
+<span class="srcline"><span class="lineno"><a href="22,40" id="srcline40">40</a></span><span class="line">        <span class="mxinfo " id="T10:U14">1   0    0</span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,41" id="srcline41">41</a></span><span class="line">        <span class="mxinfo " id="T10:U15"><span class="mxinfo " id="T4:U16">0</span>   <span class="var type1" id="S8T4U50">ct</span>  <span class="mxinfo " id="T4:U18">-<span class="var type1" id="S10T4U52">st</span></span></span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,42" id="srcline42">42</a></span><span class="line">        <span class="mxinfo " id="T10:U20"><span class="mxinfo " id="T4:U21">0</span>   <span class="var type1" id="S10T4U55">st</span>   <span class="var type1" id="S8T4U56">ct</span></span></span></span>
+<span class="srcline"><span class="lineno"><a href="22,43" id="srcline43">43</a></span><span class="line">        ]</span></span>;</span></span>
+</pre>
