@@ -7,15 +7,23 @@
 
 #include "PlatformController.hpp"
 
+inline float rad2deg(float angle){
+	return angle*180/M_PI;
+}
+inline float deg2rad(float angle){
+	return M_PI/180*angle;
+}
+
 /**
  *
  * @param servo
  * @param steward
  */
 /********************************************************/
-PlatformController::PlatformController(Servo* servo[6],Steward_Struct* steward){
-	for(int i=0;i<6;i++) servos[i] = servo[i];
+PlatformController::PlatformController(Servo servo[6],Steward_Struct* steward){
+	for(int i=0;i<6;i++) servos[i] = &servo[i];
 
+	Stop();
 	IKinit(steward);
 }
 /********************************************************/
@@ -41,6 +49,7 @@ PlatformController::PlatformController(Servo* servo1, Servo* servo2, Servo* serv
 	servos[4] = servo5;
 	servos[5] = servo6;
 
+	Stop();
 	IKinit(steward);
 }
 /********************************************************/
@@ -134,6 +143,22 @@ void PlatformController::Stop( void ){
 
 
 
+/**
+ *
+ * @param angles
+ */
+/********************************************************/
+void PlatformController::GetAngles(float angles[6]){
+	for( uint8_t i=0; i<6; i++) angles[i] = Angles[i];
+}
+void PlatformController::GetQ(float q[6]){
+	for( uint8_t i=0; i<6; i++) q[i] = Q[i];
+}
+/********************************************************/
+
+
+
+
 /***	PRIVATE FUNCTIONS	***/
 
 /**
@@ -142,7 +167,20 @@ void PlatformController::Stop( void ){
 /********************************************************/
 void PlatformController::IKfun(){
 
+
+	for(int i=0; i<3 ; i++) Q[i] = Q[i]/1000.0;
+	for(int i=3; i<6 ; i++) Q[i] = deg2rad(Q[i]);
+
 	servoIK(Q, &IK, Angles);
+
+	for(int i =0;i<6;i++){
+		if((i==0) || (i==2) ||(i==4)){ //nieparzyste
+			Angles[i] = -Angles[i] + M_PI_2;
+		}else{
+			Angles[i] = Angles[i] - M_PI_2;
+			Angles[i] = M_PI - Angles[i];
+		}
+	}
 
 }
 /********************************************************/
@@ -155,6 +193,8 @@ void PlatformController::IKfun(){
 /********************************************************/
 void PlatformController::SetPositions( void ){
 
+
+
 	for( uint8_t i=0; i<6; i++)
 		servos[i]->setPos(Angles[i]);
 
@@ -163,8 +203,12 @@ void PlatformController::SetPositions( void ){
 
 void PlatformController::IKinit(Steward_Struct* steward){
 
+
+
 	structInitFnc_initialize();
 	servoIK_initialize();
 
 	structInitFnc(steward,(struct0_T*)&IK);
+
+
 }

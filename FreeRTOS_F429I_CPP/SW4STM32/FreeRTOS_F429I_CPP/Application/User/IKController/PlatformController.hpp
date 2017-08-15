@@ -10,6 +10,10 @@
 
 #include "Servo.hpp"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "structInitFnc.h"
 #include "structInitFnc_terminate.h"
 #include "structInitFnc_initialize.h"
@@ -18,6 +22,9 @@
 #include "servoIK_terminate.h"
 #include "servoIK_initialize.h"
 
+#ifdef __cplusplus
+}
+#endif
 
 class PlatformController{
 private:
@@ -29,7 +36,7 @@ private:
 
 public:
 
-	PlatformController(Servo* servo[6],Steward_Struct* steward);
+	PlatformController(Servo servo[6],Steward_Struct* steward);
 	PlatformController(Servo* servo1, Servo* servo2, Servo* servo3, Servo* servo4, Servo* servo5, Servo* servo6, Steward_Struct* steward);
 
 	void Translate( float x, float y, float z);
@@ -46,6 +53,9 @@ public:
 
 	void Start( void );
 	void Stop( void );
+
+	void GetAngles(float angles[6]);
+	void GetQ( float q[6]);
 
 private:
 

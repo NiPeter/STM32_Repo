@@ -10,7 +10,7 @@
 
 /***	Hardware STM32	***/
 #include "stm32f4xx_hal.h"
-
+#include "math.h"
 
 class Servo{
 private:
@@ -23,12 +23,12 @@ private:
 	unsigned int		Resolution;		// PWM resolution
 
 public:
-	Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm, unsigned int resolution = 2000);
+	Servo(TIM_HandleTypeDef * htim ,uint16_t channel, unsigned int freq_pwm = 50, unsigned int resolution = 2000);
 
 	void start( void );
 	void stop( void );
 
-	void setPos(float deg);
+	void setPos(float radians);
 	float getPos( void );
 
 	void calibrate(float min, float max);
