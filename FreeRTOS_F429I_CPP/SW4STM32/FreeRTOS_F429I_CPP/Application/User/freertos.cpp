@@ -61,8 +61,10 @@
 osThreadId defaultTaskHandle;
 osThreadId bluetoothTxHandle;
 osThreadId bluetoothRxHandle;
+osThreadId touchPanelTaskHandle;
 osSemaphoreId bluetoothTxSemaphoreHandle;
 osSemaphoreId bluetoothRxSemaphoreHandle;
+osSemaphoreId touchPanelADCSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -73,6 +75,7 @@ osSemaphoreId bluetoothRxSemaphoreHandle;
 void StartDefaultTask(void const * argument);
 void StartBluetoothTx(void const * argument);
 void StartBluetoothRx(void const * argument);
+void StartTouchPanelTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -102,6 +105,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(bluetoothRxSemaphore);
   bluetoothRxSemaphoreHandle = osSemaphoreCreate(osSemaphore(bluetoothRxSemaphore), 1);
 
+  /* definition and creation of touchPanelADCSemaphore */
+  osSemaphoreDef(touchPanelADCSemaphore);
+  touchPanelADCSemaphoreHandle = osSemaphoreCreate(osSemaphore(touchPanelADCSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
 	/* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -123,6 +130,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(bluetoothRx, StartBluetoothRx, osPriorityAboveNormal, 0, 128);
   bluetoothRxHandle = osThreadCreate(osThread(bluetoothRx), NULL);
 
+  /* definition and creation of touchPanelTask */
+  osThreadDef(touchPanelTask, StartTouchPanelTask, osPriorityAboveNormal, 0, 128);
+  touchPanelTaskHandle = osThreadCreate(osThread(touchPanelTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -132,68 +143,28 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 }
 
+float x,y;
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
 
-	Bluetooth.begin();
-
-//	Command cmd(Fail);
-
-	Controller.Start();
-	float Q[6] = { 0, 0, 0, 0 ,0 ,0};
-	int i=0;
 
 	/* Infinite loop */
 	for(;;)
 	{
 
-		float angles[6] = {0 ,0 , 0 ,0 ,0 ,0};
+		if( Panel.IsTouched() ) {
+			HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_SET);
+		}
+			else HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_RESET);
 
-		Controller.Move(Q);
-		Controller.GetAngles(angles);
-
-		i++;
-		char str[30];
-		sprintf(str,"Ustawilem: %i\r\n",i);
-		Bluetooth.writeStr(str);
-
-//		bool cmdReceived = false;
-//		cmd = Comm.receiveCmd(&cmdReceived);
-//
-//		if( cmdReceived == true ){
-//			Bluetooth.writeStr("Odebrano komende\r\n");
-//			Comm.sendCmd(cmd);
-//
+		x = Panel.X;
+		y = Panel.Y;
 
 
-//			if(cmd.getType() == Set){
-//				float param = cmd.getParam();
-//
-//				Servo1.setPos(param);
-//
-//				char str[60];
-//				/********************************************************/ //TODO TAK WYSY£AÆ FLOAT!
-//				{
-//					const char *tmpSign = (param < 0) ? "-" : "";
-//					float tmpVal = (param < 0) ? -param : param;
-//
-//					int tmpInt1 = tmpVal;                  	// Get the integer (678).
-//					float tmpFrac = tmpVal - tmpInt1;      	// Get fraction (0.0123).
-//					int tmpInt2 = int(tmpFrac * 10000);  	// Turn into integer (123).
-//
-//					sprintf (str, "Ustawiam: %s%d.%04d\r\n", tmpSign, tmpInt1, tmpInt2);
-//				}
-//				/********************************************************/
-//				Bluetooth.writeStr(str);
-//
-//			}
-//		};
-
-		osDelay(50);
-
+		osDelay(100);
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -228,7 +199,27 @@ void StartBluetoothRx(void const * argument)
   /* USER CODE END StartBluetoothRx */
 }
 
+/* StartTouchPanelTask function */
+void StartTouchPanelTask(void const * argument)
+{
+  /* USER CODE BEGIN StartTouchPanelTask */
+	osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
+	/* Infinite loop */
+	for(;;)
+	{
+		Panel.Process();
+	}
+  /* USER CODE END StartTouchPanelTask */
+}
+
 /* USER CODE BEGIN Application */
+void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
+
+	if(hadc->Instance == Panel.GetADCInstance())
+		osSemaphoreRelease(touchPanelADCSemaphoreHandle);
+
+}
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 
 	if(huart->Instance == Bluetooth.getUARTInstance())

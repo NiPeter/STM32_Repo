@@ -100,6 +100,8 @@
 #define B5_GPIO_Port GPIOA
 #define VSYNC_Pin GPIO_PIN_4
 #define VSYNC_GPIO_Port GPIOA
+#define ADC_COMMON_Pin GPIO_PIN_5
+#define ADC_COMMON_GPIO_Port GPIOA
 #define G2_Pin GPIO_PIN_6
 #define G2_GPIO_Port GPIOA
 #define ACP_RST_Pin GPIO_PIN_7
@@ -212,10 +214,18 @@
 #define D2_GPIO_Port GPIOD
 #define D3_Pin GPIO_PIN_1
 #define D3_GPIO_Port GPIOD
+#define UL_Pin GPIO_PIN_2
+#define UL_GPIO_Port GPIOD
 #define G7_Pin GPIO_PIN_3
 #define G7_GPIO_Port GPIOD
+#define UR_Pin GPIO_PIN_4
+#define UR_GPIO_Port GPIOD
+#define LL_Pin GPIO_PIN_5
+#define LL_GPIO_Port GPIOD
 #define B2_Pin GPIO_PIN_6
 #define B2_GPIO_Port GPIOD
+#define LR_Pin GPIO_PIN_7
+#define LR_GPIO_Port GPIOD
 #define G3_Pin GPIO_PIN_10
 #define G3_GPIO_Port GPIOG
 #define B3_Pin GPIO_PIN_11

@@ -52,23 +52,22 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-#include "usart.h"
-#include "HC05.hpp"
-#include "Communicator.hpp"
+
+#include "objects.hpp"
+
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId bluetoothTxHandle;
 osThreadId bluetoothRxHandle;
+osThreadId touchPanelTaskHandle;
 osSemaphoreId bluetoothTxSemaphoreHandle;
 osSemaphoreId bluetoothRxSemaphoreHandle;
+osSemaphoreId touchPanelADCSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
-HC05 Bluetooth(&huart1);
-Communicator Comm(&Bluetooth);
-Command cmd(Fail);
 
 /* USER CODE END Variables */
 
@@ -76,6 +75,7 @@ Command cmd(Fail);
 void StartDefaultTask(void const * argument);
 void StartBluetoothTx(void const * argument);
 void StartBluetoothRx(void const * argument);
+void StartTouchPanelTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -105,6 +105,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(bluetoothRxSemaphore);
   bluetoothRxSemaphoreHandle = osSemaphoreCreate(osSemaphore(bluetoothRxSemaphore), 1);
 
+  /* definition and creation of touchPanelADCSemaphore */
+  osSemaphoreDef(touchPanelADCSemaphore);
+  touchPanelADCSemaphoreHandle = osSemaphoreCreate(osSemaphore(touchPanelADCSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
 	/* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -126,6 +130,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(bluetoothRx, StartBluetoothRx, osPriorityAboveNormal, 0, 128);
   bluetoothRxHandle = osThreadCreate(osThread(bluetoothRx), NULL);
 
+  /* definition and creation of touchPanelTask */
+  osThreadDef(touchPanelTask, StartTouchPanelTask, osPriorityAboveNormal, 0, 128);
+  touchPanelTaskHandle = osThreadCreate(osThread(touchPanelTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -140,36 +148,25 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
+	uint32_t data[6];
 
-
-	int i=0;
-	unsigned int freeHeap = xPortGetFreeHeapSize();
-	unsigned int used = configTOTAL_HEAP_SIZE - freeHeap;
-	Bluetooth.begin();
-
+	osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
+	Panel.SetHighPolar();
 
 	/* Infinite loop */
 	for(;;)
 	{
-		freeHeap = xPortGetFreeHeapSize();
-		used = configTOTAL_HEAP_SIZE - freeHeap;
-		bool flush = false;
-		if(flush) Bluetooth.flush();
 
-		bool cmdReceived = false;
-		cmd = Comm.receiveCmd(&cmdReceived);
-//		Command cmd = Command((CmdType_e)i,i/100.0);//Comm.receiveCmd(&cmdReceived);
-//
-//		freeHeap = xPortGetFreeHeapSize();
-		if( cmdReceived == true ){
-			i++;
-			Bluetooth.writeStr("Odebrano komende\r\n");
-			Comm.sendCmd(cmd);
-		}else Bluetooth.writeStr("\nWait...\r");
-//
-		freeHeap = xPortGetFreeHeapSize();
-		used = configTOTAL_HEAP_SIZE - freeHeap;
-		osDelay(200);
+
+		Panel.Measure();
+		osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
+		for(uint8_t i=0; i<6; i++) {
+			data[i] = Panel.Data[i];
+		}
+
+		int d;
+		d = data[5]-data[4];
+		//osDelay(10);
 
 	}
   /* USER CODE END StartDefaultTask */
@@ -205,7 +202,26 @@ void StartBluetoothRx(void const * argument)
   /* USER CODE END StartBluetoothRx */
 }
 
+/* StartTouchPanelTask function */
+void StartTouchPanelTask(void const * argument)
+{
+  /* USER CODE BEGIN StartTouchPanelTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartTouchPanelTask */
+}
+
 /* USER CODE BEGIN Application */
+void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
+
+	if(hadc->Instance == Panel.GetADCInstance())
+		osSemaphoreRelease(touchPanelADCSemaphoreHandle);
+
+}
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 
 	if(huart->Instance == Bluetooth.getUARTInstance())
