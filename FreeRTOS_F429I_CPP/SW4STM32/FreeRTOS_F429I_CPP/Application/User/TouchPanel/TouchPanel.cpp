@@ -19,13 +19,11 @@
  * @param btR
  */
 /********************************************************/
-TouchPanel::TouchPanel( ADC_HandleTypeDef* hadc, GPIO_TypeDef* hgpio, uint16_t upR, uint16_t upL, uint16_t loR, uint16_t loL,osSemaphoreId semaphore):
-				hADC(hadc),UpperLeft(hgpio,upL),UpperRight(hgpio,upR),LowerLeft(hgpio,loL),LowerRight(hgpio,loR),Semaphore(semaphore){
+TouchPanel::TouchPanel( ADC_HandleTypeDef* hadc, GPIO_TypeDef* hgpio, uint16_t upR, uint16_t upL, uint16_t loR, uint16_t loL,osSemaphoreId* semaphore):
+hADC(hadc),UpperLeft(hgpio,upL),UpperRight(hgpio,upR),LowerLeft(hgpio,loL),LowerRight(hgpio,loR),Semaphore(semaphore){
 	FilterInit();
 };
 /********************************************************/
-
-
 
 /**
  *
@@ -36,8 +34,8 @@ TouchPanel::TouchPanel( ADC_HandleTypeDef* hadc, GPIO_TypeDef* hgpio, uint16_t u
  * @param btR
  */
 /********************************************************/
-TouchPanel::TouchPanel( ADC_HandleTypeDef* hadc, Pin upR, Pin upL, Pin loR, Pin loL,osSemaphoreId semaphore):
-				hADC(hadc),UpperLeft(upL),UpperRight(upR),LowerLeft(loL),LowerRight(loR),Semaphore(semaphore){
+TouchPanel::TouchPanel( ADC_HandleTypeDef* hadc, Pin upR, Pin upL, Pin loR, Pin loL,osSemaphoreId* semaphore):
+						hADC(hadc),UpperLeft(upL),UpperRight(upR),LowerLeft(loL),LowerRight(loR),Semaphore(semaphore){
 	FilterInit();
 };
 /********************************************************/
@@ -65,14 +63,44 @@ ADC_TypeDef* TouchPanel::GetADCInstance(void){
 /********************************************************/
 void TouchPanel::Process(void){
 
-	CheckTouch();
-	if( !Touched ){
-		X=0;
-		Y=0;
+	bool tmpTouched;
+	float tmpX,tmpY;
+	tmpTouched = CheckTouch();
+
+	if( !tmpTouched ){
+		FilterX->Reset();
+		FilterY->Reset();
+
+		taskENTER_CRITICAL();
+		Touched = tmpTouched;
+		taskEXIT_CRITICAL();
+
 		return;
 	}
-	CheckX();
-	CheckY();
+
+	tmpX = CheckX();
+	tmpY = CheckY();
+
+	taskENTER_CRITICAL();
+		Touched = tmpTouched;
+		if(tmpX != 0) X = tmpX;
+		if(tmpY != 0) Y = tmpY;
+	taskEXIT_CRITICAL();
+
+}
+/********************************************************/
+
+
+
+/**
+ *
+ * @param hadc
+ */
+/********************************************************/
+void TouchPanel::ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
+	if(hadc->Instance == hADC->Instance){
+		osSemaphoreRelease(*Semaphore);
+	}
 }
 /********************************************************/
 
@@ -84,23 +112,14 @@ void TouchPanel::Process(void){
  */
 /********************************************************/
 bool TouchPanel::CheckTouch( void ){
+
 	SetHighPolar();
-	Measure();
-//	FilterTouch->Reset();
-
-	osSemaphoreWait(Semaphore,osWaitForever);
-
-//	for(uint8_t i=0; i<BufferSize-1; i++){
-//		FilterTouch->Filter( Data[i] );
-//	}
-//	float value = FilterTouch->Filter( Data[BufferSize-1] );
-
-	float value = Average(Data,BufferSize);
-
-	if(value > Treshold) Touched = true;
-		else Touched = false;
-
-	return Touched;
+	if( Measure() > Treshold){
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 /********************************************************/
 
@@ -114,29 +133,9 @@ bool TouchPanel::CheckTouch( void ){
 float TouchPanel::CheckX(void){
 
 	SetXPolar();
-	Measure();
-	FilterX->Reset();
-	osSemaphoreWait(Semaphore,osWaitForever);
-
-	for(uint8_t i=0; i<BufferSize-1; i++){
-		FilterX->Filter( Data[i] );
-	}
-	float value = FilterX->Filter( Data[BufferSize-1] );
-
-	X = value;
-//	osSemaphoreWait(Semaphore,osWaitForever);
-//	float value = Average(Data,BufferSize);
-//
-//	value = FilterX->Filter(value);
-//
-//	if(value != 0) X = value;
-
-
-	return X;
-
+	return FilterX->Filter(Measure());
 }
 /********************************************************/
-
 
 
 
@@ -148,35 +147,21 @@ float TouchPanel::CheckX(void){
 float TouchPanel::CheckY(void){
 
 	SetYPolar();
-	Measure();
-	FilterY->Reset();
-	osSemaphoreWait(Semaphore,osWaitForever);
-
-	for(uint8_t i=0; i<BufferSize-1; i++){
-		FilterY->Filter( Data[i] );
-	}
-	float value = FilterY->Filter( Data[BufferSize-1] );
-
-	Y = value;
-//	osSemaphoreWait(Semaphore,osWaitForever);
-//	float value = Average(Data,BufferSize);
-//
-//	value = FilterY->Filter(value);
-//
-//	if(value != 0) Y = value;
-
-	return Y;
+	return FilterY->Filter( Measure() );
 
 }
 /********************************************************/
+
 
 
 /**
  *
  */
 /********************************************************/
-void TouchPanel::Measure(void){
-	HAL_ADC_Start_DMA(hADC,(uint32_t*)Data,BufferSize);
+uint32_t TouchPanel::Measure(void){
+	HAL_ADC_Start_IT(hADC);
+	osSemaphoreWait(*Semaphore,osWaitForever);
+	return HAL_ADC_GetValue(hADC);
 }
 /********************************************************/
 
@@ -187,18 +172,24 @@ void TouchPanel::Measure(void){
  */
 /********************************************************/
 void TouchPanel::SetHighPolar(void){
-	taskENTER_CRITICAL();
 
 	UpperRight.Write(true);
 	UpperLeft.Write(true);
 	LowerLeft.Write(true);
 	LowerRight.Write(true);
 
-	taskEXIT_CRITICAL();
+	osDelay(SettlingTime_ms);
+}
+void TouchPanel::SetLowPolar(void){
+
+	UpperRight.Write(false);
+	UpperLeft.Write(false);
+	LowerLeft.Write(false);
+	LowerRight.Write(false);
+
 	osDelay(SettlingTime_ms);
 }
 void TouchPanel::SetXPolar(void){
-	taskENTER_CRITICAL();
 
 	UpperRight.Write(true);
 	LowerRight.Write(true);
@@ -206,11 +197,9 @@ void TouchPanel::SetXPolar(void){
 	UpperLeft.Write(false);
 	LowerLeft.Write(false);
 
-	taskEXIT_CRITICAL();
 	osDelay(SettlingTime_ms);
 }
 void TouchPanel::SetYPolar(void){
-	taskENTER_CRITICAL();
 
 	UpperRight.Write(true);
 	UpperLeft.Write(true);
@@ -218,19 +207,28 @@ void TouchPanel::SetYPolar(void){
 	LowerRight.Write(false);
 	LowerLeft.Write(false);
 
-	taskEXIT_CRITICAL();
 	osDelay(SettlingTime_ms);
 }
 /********************************************************/
 
 
 
-float TouchPanel::Average( const uint16_t* data, uint16_t size){
+/**
+ *
+ * @param data
+ * @param size
+ * @return
+ */
+/********************************************************/
+float TouchPanel::Average( const uint16_t data[], uint16_t size){
 	uint32_t sum = 0;
 	for(uint8_t i=0; i<size; i++) sum += data[i];
 
 	return sum/(float)size;
 }
+/********************************************************/
+
+
 
 
 /**
@@ -238,8 +236,8 @@ float TouchPanel::Average( const uint16_t* data, uint16_t size){
  */
 /********************************************************/
 void TouchPanel::FilterInit(void){
-	FilterX 	=  new MedianFilter(6,2);
-	FilterY		=  new MedianFilter(6,2);
+	FilterX 	=  new MedianFilter(17,3);
+	FilterY		=  new MedianFilter(17,3);
 }
 /********************************************************/
 

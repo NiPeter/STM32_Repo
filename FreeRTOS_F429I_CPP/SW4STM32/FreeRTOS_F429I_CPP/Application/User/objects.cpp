@@ -45,7 +45,7 @@ PlatformController Controller(Servos,&Steward);
 /********************************************************/
 
 extern osSemaphoreId touchPanelADCSemaphoreHandle;
-TouchPanel Panel(&hadc1,GPIOD,UR_Pin,UL_Pin,LR_Pin,LL_Pin,touchPanelADCSemaphoreHandle);
+TouchPanel Panel(&hadc1,GPIOD,UR_Pin,UL_Pin,LR_Pin,LL_Pin,&touchPanelADCSemaphoreHandle);
 
 /********************************************************/
 

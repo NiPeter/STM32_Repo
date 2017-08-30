@@ -16,7 +16,7 @@
 #include "adc.h"
 #include "gpio.h"
 
-#include "MedianFilter.hpp"
+#include "Filters/MedianFilter.hpp"
 
 
 
@@ -44,9 +44,8 @@ public:
 class TouchPanel{
 
 /***	Static variables	***/
-	static const uint16_t	SettlingTime_ms = 10; // with 1.8kOhm between ADC and GND =  0.3ms
-	static const uint32_t 	BufferSize 		= 6;
-	static const uint16_t	Treshold		= 300;
+	static const uint16_t	SettlingTime_ms = 1;
+	static const uint16_t	Treshold		= 3200;
 
 /***	Hardware objects	***/
 	ADC_HandleTypeDef*	hADC;
@@ -57,30 +56,29 @@ class TouchPanel{
 
 /***	Variables  	***/
 
-	osSemaphoreId Semaphore;
-
-	uint16_t Data[BufferSize];
+	osSemaphoreId* Semaphore;
 
 	IFilter<float,float> *FilterX, *FilterY;
+
+	float X;
+	float Y;
+	bool Touched;
+
 public:
 
-	volatile float X;
-	volatile float Y;
-	volatile bool Touched;
-
-public:
-
-	TouchPanel( ADC_HandleTypeDef* hadc, GPIO_TypeDef* hgpio, uint16_t upR, uint16_t upL, uint16_t loR, uint16_t loL, osSemaphoreId semaphore);
-	TouchPanel( ADC_HandleTypeDef* hadc, Pin upR, Pin upL, Pin loR, Pin loL,osSemaphoreId semaphore);
+	TouchPanel( ADC_HandleTypeDef* hadc, GPIO_TypeDef* hgpio, uint16_t upR, uint16_t upL, uint16_t loR, uint16_t loL, osSemaphoreId* semaphore);
+	TouchPanel( ADC_HandleTypeDef* hadc, Pin upR, Pin upL, Pin loR, Pin loL,osSemaphoreId* semaphore);
 
 	ADC_TypeDef* GetADCInstance(void);
+
 	bool IsTouched( void ) {return Touched;};
 	float GetX(void){return X;};
 	float GetY(void){return Y;};
 
 	void Process(void);
+	void ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc);
 
-private:
+//private:
 
 	void FilterInit(void);
 
@@ -88,12 +86,14 @@ private:
 	float CheckX(void);
 	float CheckY(void);
 
-	void Measure(void);
+	uint32_t Measure(void);
 	void SetHighPolar(void);
+	void SetLowPolar(void);
 	void SetXPolar(void);
 	void SetYPolar(void);
 
-	float Average( const uint16_t* data, uint16_t size);
+	float Average( const uint16_t data[], uint16_t size);
+	inline uint32_t GetADCValue(){return HAL_ADC_GetValue(hADC);};
 
 };
 /********************************************************/

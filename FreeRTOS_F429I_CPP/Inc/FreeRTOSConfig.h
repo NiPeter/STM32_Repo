@@ -96,13 +96,13 @@
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          0
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
-#define configUSE_IDLE_HOOK                      0
-#define configUSE_TICK_HOOK                      0
+#define configUSE_IDLE_HOOK                      1
+#define configUSE_TICK_HOOK                      1
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 18 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)0x20000)
+#define configTOTAL_HEAP_SIZE                    ((size_t)0x12000)
 #define configMAX_TASK_NAME_LEN                  ( 32 )
 #define configUSE_16_BIT_TICKS                   0
 #define configUSE_MUTEXES                        1
@@ -123,6 +123,8 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelayUntil             0
 #define INCLUDE_vTaskDelay                  1
 #define INCLUDE_xTaskGetSchedulerState      1
+#define INCLUDE_xTaskGetCurrentTaskHandle   1
+#define INCLUDE_eTaskGetState               1
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
@@ -166,6 +168,10 @@ standard names. */
 
 /* USER CODE BEGIN Defines */   	      
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
+#define traceTASK_SWITCHED_IN()  extern void StartIdleMonitor(void); \
+                                       StartIdleMonitor()
+#define traceTASK_SWITCHED_OUT() extern void EndIdleMonitor(void); \
+                                       EndIdleMonitor()
 /* USER CODE END Defines */ 
 
 #endif /* FREERTOS_CONFIG_H */

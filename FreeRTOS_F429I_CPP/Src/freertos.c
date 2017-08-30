@@ -67,7 +67,12 @@ osSemaphoreId bluetoothRxSemaphoreHandle;
 osSemaphoreId touchPanelADCSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
-
+uint8_t td;
+float X,Y;
+uint32_t adc;
+size_t heap;
+uint16_t cpu;
+uint32_t inc;
 
 /* USER CODE END Variables */
 
@@ -84,6 +89,34 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
+void vApplicationIdleHook(void);
+void vApplicationTickHook(void);
+
+/* USER CODE BEGIN 2 */
+__weak void vApplicationIdleHook( void )
+{
+   /* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
+   to 1 in FreeRTOSConfig.h. It will be called on each iteration of the idle
+   task. It is essential that code added to this hook function never attempts
+   to block in any way (for example, call xQueueReceive() with a block time
+   specified, or call vTaskDelay()). If the application makes use of the
+   vTaskDelete() API function (as this demo application does) then it is also
+   important that vApplicationIdleHook() is permitted to return to its calling
+   function, because it is the responsibility of the idle task to clean up
+   memory allocated by the kernel to any task that has since been deleted. */
+}
+/* USER CODE END 2 */
+
+/* USER CODE BEGIN 3 */
+__weak void vApplicationTickHook( void )
+{
+   /* This function will be called by each tick interrupt if
+   configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h. User code can be
+   added here, but the tick hook is called from an interrupt context, so
+   code must not attempt to block, and only the interrupt safe FreeRTOS API
+   functions can be used (those that end in FromISR()). */
+}
+/* USER CODE END 3 */
 
 /* Init FreeRTOS */
 
@@ -148,25 +181,27 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-	uint32_t data[6];
-
-	osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
-	Panel.SetHighPolar();
 
 	/* Infinite loop */
 	for(;;)
 	{
 
+		heap = xPortGetFreeHeapSize();
 
-		Panel.Measure();
-		osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
-		for(uint8_t i=0; i<6; i++) {
-			data[i] = Panel.Data[i];
+		bool beforeState = td;
+
+		td = (Panel.IsTouched())? 23:0;
+
+		if( (td==0) && (beforeState!=0) ) inc++;
+
+		if( td ){
+			X = Panel.GetX();
+			Y = Panel.GetY();
+			HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_SET);
+		}else{
+			HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_RESET);
 		}
-
-		int d;
-		d = data[5]-data[4];
-		//osDelay(10);
+		osDelay(25);
 
 	}
   /* USER CODE END StartDefaultTask */
@@ -206,19 +241,26 @@ void StartBluetoothRx(void const * argument)
 void StartTouchPanelTask(void const * argument)
 {
   /* USER CODE BEGIN StartTouchPanelTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	 TickType_t xLastWakeTime;
+	 const TickType_t xFrequency = 10;
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
+
+	osSemaphoreWait(touchPanelADCSemaphoreHandle,osWaitForever);
+	/* Infinite loop */
+	for(;;)
+	{
+		Panel.Process();
+		osDelayUntil(&xLastWakeTime,xFrequency);
+	}
   /* USER CODE END StartTouchPanelTask */
 }
 
 /* USER CODE BEGIN Application */
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
 
-	if(hadc->Instance == Panel.GetADCInstance())
-		osSemaphoreRelease(touchPanelADCSemaphoreHandle);
+	Panel.ADC_ConvCpltCallback(hadc);
+	adc = HAL_ADC_GetValue(hadc);
 
 }
 
