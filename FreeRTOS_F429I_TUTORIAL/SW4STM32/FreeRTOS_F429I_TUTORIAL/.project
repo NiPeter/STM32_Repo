@@ -23,12 +23,58 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>fr.ac6.mcu.ide.core.MCUProjectNature</nature>
+		<nature>org.eclipse.cdt.core.ccnature</nature>
 	</natures>
 	<linkedResources>
 		<link>
 			<name>Application/SW4STM32/startup_stm32f429xx.s</name>
+<<<<<<< HEAD
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/startup_stm32f429xx.s</locationURI>
+=======
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/startup_stm32f429xx.s</locationURI>
+		</link>
+		<link>
+			<name>Application/User/adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/adc.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/freertos.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/freertos.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gpio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/gpio.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/main.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/main.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/stm32f4xx_hal_msp.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/stm32f4xx_hal_msp.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/stm32f4xx_hal_timebase_TIM.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/stm32f4xx_hal_timebase_TIM.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/stm32f4xx_it.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/stm32f4xx_it.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/usart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Src/usart.c</locationURI>
+>>>>>>> CP-SingleMsg
 		</link>
 		<link>
 			<name>Drivers/CMSIS/system_stm32f4xx.c</name>
@@ -37,8 +83,23 @@
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal.c</name>
+<<<<<<< HEAD
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c</locationURI>
+=======
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_adc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</locationURI>
+>>>>>>> CP-SingleMsg
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_cortex.c</name>
@@ -57,12 +118,21 @@
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_flash.c</name>
+<<<<<<< HEAD
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_flash_ex.c</name>
 			<type>1</type>
+=======
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_flash_ex.c</name>
+			<type>1</type>
+>>>>>>> CP-SingleMsg
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c</locationURI>
 		</link>
 		<link>
@@ -87,12 +157,21 @@
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.c</name>
+<<<<<<< HEAD
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc_ex.c</name>
 			<type>1</type>
+=======
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc_ex.c</name>
+			<type>1</type>
+>>>>>>> CP-SingleMsg
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c</locationURI>
 		</link>
 		<link>
@@ -102,8 +181,63 @@
 		</link>
 		<link>
 			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim_ex.c</name>
+<<<<<<< HEAD
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c</locationURI>
+=======
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/cmsis_os.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/croutine.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/croutine.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/event_groups.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/heap_4.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/list.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/list.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/port.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/queue.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/queue.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/tasks.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/tasks.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FreeRTOS/timers.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/timers.c</locationURI>
+>>>>>>> CP-SingleMsg
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -1,0 +1,18 @@
+<!-- saved from url=(0014)about:internet -->
+<pre class="code">
+<span class="srcline"><span class="lineno"><a href="23,1" id="srcline1"> 1</a></span><span class="line"><span class="keyword">function</span> [ <span class="var type1" id="S2T8U3">R</span> ] = Rxyz( <span class="var type1" id="S3T4U6">roll</span>, <span class="var type1" id="S4T4U7">pitch</span>, <span class="var type1" id="S5T4U8">yaw</span> )</span></span>
+<span class="srcline"><span class="lineno"><a href="23,2" id="srcline2"> 2</a></span><span class="line"><span class="comment">%RXYZ Summary of this function goes here</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,3" id="srcline3"> 3</a></span><span class="line"><span class="comment">%   Detailed explanation goes here</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,4" id="srcline4"> 4</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="23,5" id="srcline5"> 5</a></span><span class="line"><span class="comment">% if nargin &lt; 2</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,6" id="srcline6"> 6</a></span><span class="line"><span class="comment">%     t = roll;</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,7" id="srcline7"> 7</a></span><span class="line"><span class="comment">%     roll = t(1);</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,8" id="srcline8"> 8</a></span><span class="line"><span class="comment">%     pitch = t(2);</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,9" id="srcline9"> 9</a></span><span class="line"><span class="comment">%     yaw = t(3);</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,10" id="srcline10">10</a></span><span class="line"><span class="comment">% end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,11" id="srcline11">11</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="23,12" id="srcline12">12</a></span><span class="line">    <span class="mxinfo " id="T8:U5"><span class="var type1" id="S2T8U11">R</span> = <span class="mxinfo " id="T8:U7"><span class="mxinfo " id="T8:U8"><span class="mxinfo " id="T8:U9"><span class="fcn" id="F8N6:B15">rotz</span>(<span class="var type1" id="S5T4U16">yaw</span>)</span>*<span class="mxinfo " id="T8:U11"><span class="fcn" id="F9N5:B18">roty</span>(<span class="var type1" id="S4T4U19">pitch</span>)</span></span>*<span class="mxinfo " id="T8:U13"><span class="fcn" id="F36N4:B21">rotx</span>(<span class="var type1" id="S3T4U22">roll</span>)</span></span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="23,13" id="srcline13">13</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="23,14" id="srcline14">14</a></span><span class="line"><span class="keyword">end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="23,15" id="srcline15">15</a></span><span class="line"></span></span>
+</pre>
