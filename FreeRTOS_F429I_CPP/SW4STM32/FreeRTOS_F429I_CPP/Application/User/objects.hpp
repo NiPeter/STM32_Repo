@@ -12,9 +12,19 @@
 
 /***	INCLUDES	***/
 
-#include "usart.h"
-#include "tim.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "main.h"
 #include "adc.h"
+#include "tim.h"
+#include "usart.h"
+#include "gpio.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #include "HC05.hpp"
 #include "Communicator.hpp"
@@ -22,7 +32,7 @@
 #include "Servo.hpp"
 #include "PlatformController.hpp"
 
-#include "TouchPanel.hpp"
+#include "TouchPanel/TouchPanel_4W/TouchPanel_4W.hpp"
 
 
 /***	***	***		***/
@@ -42,7 +52,7 @@ extern Steward_Struct steward;
 
 extern PlatformController Controller;
 
-extern TouchPanel Panel;
+extern TouchPanel4W Panel;
 
 /********************************************************/
 /********************************************************/

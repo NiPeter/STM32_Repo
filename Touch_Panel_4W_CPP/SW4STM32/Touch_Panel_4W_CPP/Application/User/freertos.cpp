@@ -65,11 +65,16 @@ osThreadId touchPanelTaskHandle;
 osSemaphoreId touchPanelSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
+
+
 float X,Y;
 uint8_t Touched;
 uint32_t Time;
 TickType_t start, stop;
 Pin	Led(LD3_GPIO_Port,LD3_Pin);
+
+
+
 /********************************************************/
 AnalogPin 	XAnalog(&hadc1,X_ADC_GPIO_Port,X_ADC_Pin);
 AnalogPin 	YAnalog(&hadc2,Y_ADC_GPIO_Port,Y_ADC_Pin);

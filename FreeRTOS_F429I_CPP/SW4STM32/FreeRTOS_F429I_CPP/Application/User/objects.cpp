@@ -44,8 +44,13 @@ PlatformController Controller(Servos,&Steward);
 
 /********************************************************/
 
-extern osSemaphoreId touchPanelADCSemaphoreHandle;
-TouchPanel Panel(&hadc1,GPIOD,UR_Pin,UL_Pin,LR_Pin,LL_Pin,&touchPanelADCSemaphoreHandle);
+
+AnalogPin 	XAnalog(&hadc1,X_ADC_GPIO_Port,X_ADC_Pin);
+AnalogPin 	YAnalog(&hadc2,Y_ADC_GPIO_Port,Y_ADC_Pin);
+Pin			XGnd(X_GND_GPIO_Port,X_GND_Pin);
+Pin			YGnd(Y_GND_GPIO_Port,Y_GND_Pin);
+
+TouchPanel4W Panel(XAnalog,XGnd,YAnalog,YGnd);
 
 /********************************************************/
 

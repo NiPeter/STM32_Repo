@@ -71,11 +71,15 @@ osSemaphoreId touchPanelADCSemaphoreHandle;
 /* USER CODE BEGIN Variables */
 uint8_t td;
 float X,Y;
+uint32_t inc;
+
+float x,y,z,roll,pitch,yaw;
+float Q[6] = {0,0,0,0,0,0};
+
 uint32_t adc;
+
 size_t heap;
 float cpu;
-uint32_t inc;
-uint8_t i;
 
 /* USER CODE END Variables */
 
@@ -88,7 +92,8 @@ void StartTouchPanelTask(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
-
+void OS_Check(void);
+void Touch_Check(void);
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
@@ -184,32 +189,28 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-	i = 20;
+	Bluetooth.begin();
+	Controller.Start();
+
 	/* Infinite loop */
 	for(;;)
 	{
 
-		heap = xPortGetFreeHeapSize();
-		cpu = osGetCPUUsage();
+		Servos[0].start();
+		Servos[0].setPos(180);
 
+		Q[0] = x;
+		Q[1] = y;
+		Q[2] = z;
+		Q[3] = roll;
+		Q[4] = pitch;
+		Q[5] = yaw;
 
+		//Controller.Move(Q);
 
-		bool beforeState = td;
-
-		td = (Panel.IsTouched())? 23:0;
-
-		if( (td==0) && (beforeState!=0) ) inc++;
-
-		if( td ){
-			X = Panel.GetX();
-			Y = Panel.GetY();
-			HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_SET);
-		}else{
-			HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_RESET);
-		}
-
-
-		if(i!=0) osDelay(i);
+		Touch_Check();
+		OS_Check();
+		osDelay(1);
 
 	}
   /* USER CODE END StartDefaultTask */
@@ -258,11 +259,8 @@ void StartTouchPanelTask(void const * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-//		Panel.Process();
-//		osDelayUntil(&xLastWakeTime,xFrequency);
-		Panel.SetXPolar();
-		Panel.SetYPolar();
-		Panel.SetHighPolar();
+		Panel.Process();
+		osDelayUntil(&xLastWakeTime,xFrequency);
 	}
   /* USER CODE END StartTouchPanelTask */
 }
@@ -271,7 +269,6 @@ void StartTouchPanelTask(void const * argument)
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
 
 	Panel.ADC_ConvCpltCallback(hadc);
-	adc = HAL_ADC_GetValue(hadc);
 
 }
 
@@ -286,6 +283,30 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
 	if(huart->Instance == Bluetooth.getUARTInstance())
 		osSemaphoreRelease(bluetoothRxSemaphoreHandle);
+
+}
+
+void OS_Check(void){
+	//Get RTOS free heap and cpu usage
+	heap = xPortGetFreeHeapSize();
+	cpu = osGetCPUUsage();
+}
+
+void Touch_Check(void){
+
+	bool beforeState = td;
+
+	td = (Panel.IsTouched())? 23:0;
+
+	if( (td==0) && (beforeState!=0) ) inc++;
+
+	if( td ){
+		X = Panel.GetX();
+		Y = Panel.GetY();
+		HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_SET);
+	}else{
+		HAL_GPIO_WritePin(LD3_GPIO_Port,LD3_Pin,GPIO_PIN_RESET);
+	}
 
 }
 /* USER CODE END Application */

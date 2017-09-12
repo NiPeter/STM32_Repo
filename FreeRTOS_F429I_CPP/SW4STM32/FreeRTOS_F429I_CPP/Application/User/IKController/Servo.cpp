@@ -53,9 +53,10 @@ void Servo::stop( void ){
  */
 /********************************************************/
 void Servo::setPos(float radians){
-	uint16_t CCR;
 
-	CCR = msToCCR( angToMs( radians ) );
+	float ms = angToMs( radians );
+
+	uint16_t CCR = msToCCR( ms );
 	__HAL_TIM_SET_COMPARE(hTIM,Channel,CCR);
 }
 /********************************************************/
@@ -89,7 +90,7 @@ void Servo::calibrate(float min, float max){
 float Servo::angToMs( float angle){
 	float dms = ms_max - ms_min;
 
-	return dms/(M_PI)*angle + ms_min;
+	return dms/(180.0)*angle + ms_min;
 }
 
 uint16_t Servo::msToCCR( float ms ){

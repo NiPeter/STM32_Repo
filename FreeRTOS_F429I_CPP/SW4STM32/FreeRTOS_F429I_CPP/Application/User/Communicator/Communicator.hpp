@@ -20,7 +20,6 @@ class Communicator
 	Serial* SerialPort;
 
 public:
-	int freeHeap;
 
 	Communicator(Serial* serial);
 	~Communicator();

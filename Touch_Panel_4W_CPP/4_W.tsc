@@ -1,5 +1,5 @@
 #STM Touch Studio user settings - do not edit
-#Wed Aug 30 14:36:54 CEST 2017
+#Wed Aug 30 14:46:52 CEST 2017
 ExprVariable.Col0ModelIdx=0
 ExprVariable.Col0Width=15
 ExprVariable.Col1ModelIdx=1
@@ -94,7 +94,7 @@ TouchPointViewer.YRange.Low=0.0
 TouchPointViewer.YRange.Up=4095.0
 VarViewer.DisplayAllMode=Curve
 VarViewer.Number=2
-VarViewer.SelectedTab=1
+VarViewer.SelectedTab=0
 VarViewer.ShowIndex=false
 VarViewer.Version=4
 VarViewer1.DisplayMode=Table

@@ -39,6 +39,7 @@ public:
 	PlatformController(Servo servo[6],Steward_Struct* steward);
 	PlatformController(Servo* servo1, Servo* servo2, Servo* servo3, Servo* servo4, Servo* servo5, Servo* servo6, Steward_Struct* steward);
 
+	// Units - deg and mm
 	void Translate( float x, float y, float z);
 	void X( float x );
 	void Y( float y );

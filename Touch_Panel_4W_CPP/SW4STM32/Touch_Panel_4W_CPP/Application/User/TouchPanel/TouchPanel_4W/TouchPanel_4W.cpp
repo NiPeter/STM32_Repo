@@ -1,6 +1,6 @@
 
 #include "TouchPanel_4W.hpp"
-
+#define MS 1
 TouchPanel4W::TouchPanel4W(AnalogPin &x_analog,Pin &x_gnd,AnalogPin &y_analog,Pin &y_gnd)
 :XAnalog(x_analog),YAnalog(y_analog),XGnd(x_gnd),YGnd(y_gnd){
 	X = 0;
@@ -20,6 +20,7 @@ void TouchPanel4W::InitFilters(){
 void TouchPanel4W::Process(void){
 
 	PrepareTouchDetection();
+	osDelay(MS);
 	if(XAnalog.Read() != false){
 		XFilter->Reset();
 		YFilter->Reset();
@@ -47,6 +48,7 @@ void TouchPanel4W::ADC_ConvCpltCallback (ADC_HandleTypeDef * hadc){
 
 uint32_t TouchPanel4W::MeasureX(){
 	PrepareXMeasurement();
+	osDelay(MS);
 	YAnalog.Measure();
 	HAL_ADC_PollForConversion(YAnalog.GetADC_Handle(),100);
 	return YAnalog.GetADCValue();
@@ -54,6 +56,7 @@ uint32_t TouchPanel4W::MeasureX(){
 }
 uint32_t TouchPanel4W::MeasureY(){
 	PrepareYMeasurement();
+	osDelay(MS);
 	XAnalog.Measure();
 	HAL_ADC_PollForConversion(XAnalog.GetADC_Handle(),100);
 	return XAnalog.GetADCValue();
